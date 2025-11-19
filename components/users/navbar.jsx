@@ -90,45 +90,49 @@ export default function Navbar({ user }) {
 
     {/* Desktop Menu */}
     <ul className="hidden md:flex items-center gap-8 text-sm font-medium lg:text-base">
-      {user.isAdmin!=true ? (
+            {user ? ( // ✅ FIXED: Simple check if user exists
         // User is logged in
         <>
-          <li>
-            <Link
-              href="/dashboard"
-              className="hover:text-gray-300 transition-colors duration-200"
-            >
-              Dashboard
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/resources"
-              className="hover:text-gray-300 transition-colors duration-200"
-            >
-              Resources
-            </Link>
-          </li>
-          
+         
           {/* Admin Panel - Only for admins */}
-          {user.isAdmin === true && (
+          {user?.isAdmin === true ? (
             <>
-            <li>
-            <Link
-              href="/admin/dashboard"
-              className="hover:text-gray-300 transition-colors duration-200"
-            >
-              Dashboard
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/admin/library"
-              className="hover:text-gray-300 transition-colors duration-200"
-            >
-              Library Management
-            </Link>
-          </li>
+              <li>
+                <Link
+                  href="/admin/dashboard"
+                  className="hover:text-gray-300 transition-colors duration-200"
+                >
+                  Admin Dashboard
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin/library"
+                  className="hover:text-gray-300 transition-colors duration-200"
+                >
+                  Library Management
+                </Link>
+              </li>
+            </>
+          ): (
+            <>
+              <li>
+                  <Link
+                    href="/dashboard"
+                    className="hover:text-gray-300 transition-colors duration-200"
+                  >
+                    Dashboard
+                  </Link>
+              </li>
+              <li>
+                  <Link
+                    href="/resources"
+                    className="hover:text-gray-300 transition-colors duration-200"
+                  >
+                    Resources
+                  </Link>
+              </li>
+          
             </>
           )}
           
@@ -139,28 +143,25 @@ export default function Navbar({ user }) {
               className="hover:text-gray-300 transition-colors duration-200 relative"
             >
               <BellDot size={22} />
-              {/* {notificationCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                  {notificationCount}
-                </span>
-              )} */}
             </Link>
           </li>
-           <li>
-                {mounted && (
-                  <button
-                    onClick={toggleTheme}
-                    className="relative w-12 h-12 flex items-center justify-center rounded-full hover:bg-white/10 transition-all duration-300 group"
-                    aria-label="Toggle theme"
-                  >
-                    {theme === 'dark' ? (
-                      <Moon size={20} className="text-white group-hover:scale-110 transition-transform" />
-                    ) : (
-                      <Sun size={20} className="text-white group-hover:scale-110 transition-transform" />
-                    )}
-                  </button>
+           
+          <li>
+            {mounted && (
+              <button
+                onClick={toggleTheme}
+                className="relative w-12 h-12 flex items-center justify-center rounded-full hover:bg-white/10 transition-all duration-300 group"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? (
+                  <Moon size={20} className="text-white group-hover:scale-110 transition-transform" />
+                ) : (
+                  <Sun size={20} className="text-white group-hover:scale-110 transition-transform" />
                 )}
-              </li>                
+              </button>
+            )}
+          </li>                
+          
           {/* User Menu Dropdown */}
           <li className="relative group">
             <button className="flex items-center gap-2 hover:opacity-80 transition-all duration-200">
@@ -173,17 +174,10 @@ export default function Navbar({ user }) {
               <div className="py-2">
                 {/* User Info */}
                 <div className="px-4 py-2 border-b border-gray-100">
-                  <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-                  <p className="text-xs text-gray-500">{user.email}</p>
+                  <p className="text-sm font-semibold text-gray-900">{user?.name}</p>
+                  <p className="text-xs text-gray-500">{user?.email}</p>
                 </div>
-                
-                <Link
-                  href="/profile"
-                  className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  <User size={16} />
-                  My Profile
-                </Link>
+
                 <Link
                   href="/settings"
                   className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -282,173 +276,174 @@ export default function Navbar({ user }) {
       {menuOpen ? <X size={28} /> : <Menu size={28} />}
     </button>
 
-    {/* Mobile Menu */}
-    {menuOpen && (
-      <div
-        ref={menuRef}
-        className="absolute top-full right-4 mt-2 w-64 bg-white rounded-lg shadow-xl md:hidden transition-all duration-200 z-20 dark:bg-gray-800 dark:text-gray-300 border-0 hover:rounded-2xl"
-      >
-        <div className="">
-          {user ? (
-            // Mobile menu for logged in user
-            <>
-              {/* User Info Header */}
-              <div className="px-4 py-3 border-b border-gray-100 dark:bg-gray-900 dark:text-gray-100 ">
-                <div className="flex items-center gap-3">
-                  <UserAvatar 
-                      avatar={user.image} 
-                      email={user.email} 
-                      size={35}
-                      className="w-5 h-5  text-blue-600 bg-black rounded-lg"
-                    />
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-                    <p className="text-xs text-gray-500">{user.email}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={() => setMenuOpen(false)}
-              >
-                <LayoutDashboard size={18} />
-                Dashboard
-              </Link>
-              <Link
-                href="/resources"
-                className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={() => setMenuOpen(false)}
-              >
-                <BookOpen size={18} />
-                Resources
-              </Link>
-              
-              {user.role === 'admin' && (
-                <Link
-                  href="/admin"
-                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-blue-600 hover:bg-gray-100 font-semibold"
-                  onClick={() => setMenuOpen(false)}
+     {/* Mobile Menu */}
+            {menuOpen && (
+                <div
+                    ref={menuRef}
+                    className="absolute top-full right-4 mt-2 w-64 bg-white rounded-lg shadow-xl md:hidden transition-all duration-200 z-20 dark:bg-gray-800 dark:text-gray-300 border-0 hover:rounded-2xl"
                 >
-                  <Shield size={18} />
-                  Admin Panel
-                </Link>
-              )}
-              
-              <Link
-                href="/notifications"
-                className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={() => setMenuOpen(false)}
-              >
-                <BellDot size={18} />
-                Notifications
-                {/* {notificationCount > 0 && (
-                  <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                    {notificationCount}
-                  </span>
-                )} */}
-              </Link>
-              
-              <hr className="my-1" />
-               {/* theme toggle */}
-               <li>
-                {mounted && (
-                  <button
-                    onClick={toggleTheme}
-                    className="relative w-full px-4 h-12 flex items-center hover:bg-gray-100 transition-all duration-300 group"  
-                    aria-label="Toggle theme"
-                  >
-                    {theme === 'dark' ? (
-                      <Moon size={20} className="text-gray-700  group-hover:scale-110 transition-transform" />
-                    ) : (
-                      <Sun size={20} className="text-gray-700 group-hover:scale-110 transition-transform" />
-                    )}
-                  </button>
-                )}
-              </li>
-              
-              <Link
-                href="/profile"
-                className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={() => setMenuOpen(false)}
-              >
-                
-                <UserAvatar avatar='' email='user.email'/>
-                My Profile
-              </Link>
-              <Link
-                href="/settings"
-                className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={() => setMenuOpen(false)}
-              >
-                <Settings size={18} />
-                Settings
-              </Link>
-              
-              <hr className="my-1" />
-              
-              <button
-                onClick={handleSignOut}
-                className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-gray-100"
-              >
-                <LogOut size={18} />
-                Sign Out
-              </button>
-            </>
-          ) : (
-            // Mobile menu for guest
-            <>
-              <Link
-                href="/resources"
-                className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={() => setMenuOpen(false)}
-              >
-                <BookOpen size={18} />
-                Resources
-              </Link>
-              <Link
-                href="/about"
-                className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={() => setMenuOpen(false)}
-              >
-                <Info size={18} />
-                About
-              </Link>
-              <Link
-                href="/contact"
-                className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={() => setMenuOpen(false)}
-              >
-                <Mail size={18} />
-                Contact
-              </Link>
-                <button
-                    onClick={toggleTheme}
-                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
-                    {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
-                  </button>
-              <hr className="my-1" />
-              
-              <button
-                onClick={handleSignup}
-                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm text-white bg-blue-500 hover:bg-blue-600 font-medium"
-              >
-                Sign Up
-              </button>
-              <button
-                onClick={handleLogin}
-                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-200"
-              >
-                Login
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-    )}
+                    <div className="">
+                        {user ? (
+                            // Mobile menu for logged in user
+                            <>
+                                {/* User Info Header */}
+                                <div className="px-4 py-3 border-b border-gray-100 dark:bg-gray-900 dark:text-gray-100">
+                                    <div className="flex items-center gap-3">
+                                        <UserAvatar 
+                                            avatar={user.image} 
+                                            email={user.email} 
+                                            size={35}
+                                            className="w-5 h-5 text-blue-600 bg-black rounded-lg"
+                                        />
+                                        <div>
+                                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{user.name[0].toUpperCase()+user.name.slice(1)}</p>
+                                            <p className="text-xs text-gray-500">{user.email}</p>
+                                            {user?.isAdmin && (
+                                                <span>
+                                                    Admin
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* ADMIN MOBILE MENU */}
+                                {user?.isAdmin ? (
+                                    <>
+                                        <Link
+                                            href="/admin/dashboard"
+                                            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setMenuOpen(false)}
+                                        >
+                                            <LayoutDashboard size={18} />
+                                            Admin Dashboard
+                                        </Link>
+                                        <Link
+                                            href="/admin/library"
+                                            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setMenuOpen(false)}
+                                        >
+                                            <Shield size={18} />
+                                            Library Management
+                                        </Link> 
+                                    </>
+                                ) : (
+                                    // REGULAR USER MOBILE MENU
+                                    <>
+                                        <Link
+                                            href="/dashboard"
+                                            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setMenuOpen(false)}
+                                        >
+                                            <LayoutDashboard size={18} />
+                                            Dashboard
+                                        </Link>
+                                        <Link
+                                            href="/resources"
+                                            className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setMenuOpen(false)}
+                                        >
+                                            <BookOpen size={18} />
+                                            Resources
+                                        </Link>
+                                    </>
+                                )}
+                                
+                                {/* Common mobile links for all users */}
+                                <Link
+                                    href="/notifications"
+                                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
+                                    onClick={() => setMenuOpen(false)}
+                                >
+                                    <BellDot size={18} />
+                                    Notifications
+                                </Link>
+                                
+                                <hr className="my-1" />
+                                
+                                {/* Theme toggle */}
+                                <button
+                                    onClick={toggleTheme}
+                                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                    {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
+                                    {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                                </button>
+                                
+                              
+                                <Link
+                                    href="/settings"
+                                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
+                                    onClick={() => setMenuOpen(false)}
+                                >
+                                    <Settings size={18} />
+                                    Settings
+                                </Link>
+                                
+                                <hr className="my-1" />
+                                
+                                <button
+                                    onClick={handleSignOut}
+                                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-gray-100"
+                                >
+                                    <LogOut size={18} />
+                                    Sign Out
+                                </button>
+                            </>
+                        ) : (
+                            // Mobile menu for guest
+                            <>
+                                <Link
+                                    href="/resources"
+                                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
+                                    onClick={() => setMenuOpen(false)}
+                                >
+                                    <BookOpen size={18} />
+                                    Resources
+                                </Link>
+                                <Link
+                                    href="/about"
+                                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
+                                    onClick={() => setMenuOpen(false)}
+                                >
+                                    <Info size={18} />
+                                    About
+                                </Link>
+                                <Link
+                                    href="/contact"
+                                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
+                                    onClick={() => setMenuOpen(false)}
+                                >
+                                    <Mail size={18} />
+                                    Contact
+                                </Link>
+                                <button
+                                    onClick={toggleTheme}
+                                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                    {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
+                                    {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                                </button>
+                                <hr className="my-1" />
+                                
+                                <button
+                                    onClick={handleSignup}
+                                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm text-white bg-blue-500 hover:bg-blue-600 font-medium"
+                                >
+                                    Sign Up
+                                </button>
+                                <button
+                                    onClick={handleLogin}
+                                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-200"
+                                >
+                                    Login
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
+
   </nav>
 );
 }

@@ -4,6 +4,8 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { Bell, Search, X, LogOut, User } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { UserAvatar } from "./userAvatar"
+import { Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
 import { toast } from 'sonner';
 interface NavbarProps {
     user?: {
@@ -18,8 +20,12 @@ interface NavbarProps {
 }
 
 export default function NavbarDashboard({ user  , pageTitle="dashboard"}: NavbarProps ) {
-   
-
+   const { theme, setTheme } = useTheme();
+       const [mounted, setMounted] = useState(false);
+       useEffect(() => setMounted(true), []);
+       const toggleTheme = () => {
+         setTheme(prev => prev === 'light' ? 'dark' : 'light');
+       };
   const isMobileDevice = useIsMobile()
   const [query, setQuery] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -228,7 +234,23 @@ export default function NavbarDashboard({ user  , pageTitle="dashboard"}: Navbar
                 <Bell className="w-5 h-5 text-blue-600 group-hover:text-blue-800" />
                 <div className="absolute -top-0 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
               </button>
-
+              <div>
+                 <li>
+                            {mounted && (
+                              <button
+                                onClick={toggleTheme}
+                                className="relative w-12 h-12 flex items-center justify-center rounded-full hover:bg-white/10 transition-all duration-300 group"
+                                aria-label="Toggle theme"
+                              >
+                                {theme === 'dark' ? (
+                                  <Moon size={20} className="text-white group-hover:scale-110 transition-transform" />
+                                ) : (
+                                  <Sun size={20} className="text-white group-hover:scale-110 transition-transform" />
+                                )}
+                              </button>
+                            )}
+                          </li>
+              </div>
               {/* User Menu */}
               <div className="relative" ref={userMenuRef}>
                 <button 
@@ -285,7 +307,23 @@ export default function NavbarDashboard({ user  , pageTitle="dashboard"}: Navbar
               <Bell className="w-5 h-5 text-blue-600 group-hover:text-blue-800" />
               <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
             </button>
-
+            <div>
+               <li>
+                          {mounted && (
+                            <button
+                              onClick={toggleTheme}
+                              className="relative w-12 h-12 flex items-center justify-center rounded-full hover:bg-white/10 transition-all duration-300 group"
+                              aria-label="Toggle theme"
+                            >
+                              {theme === 'dark' ? (
+                                <Moon size={20} className="text-white group-hover:scale-110 transition-transform" />
+                              ) : (
+                                <Sun size={20} className="text-white group-hover:scale-110 transition-transform" />
+                              )}
+                            </button>
+                          )}
+                        </li>
+            </div>
             {/* User Menu */}
             <div className="relative" ref={userMenuRef}>
               <button 

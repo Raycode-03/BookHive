@@ -133,3 +133,31 @@ export function UsersBoxSkeleton({ count = 4 }: { count?: number }) {
     </div>
   );
 }
+export function BooksSkeleton({ count = 8 }: { count?: number }) {
+  return (
+    <div className="p-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {Array.from({ length: count }).map((_, index) => (
+          <div
+            key={index}
+            className="w-full bg-white dark:bg-gray-800 shadow-md rounded-2xl overflow-hidden transition-all flex flex-col animate-pulse"
+          >
+            {/* Image Skeleton */}
+            <div className="relative h-40 bg-gray-300 dark:bg-gray-600" />
+            
+            {/* Content Skeleton */}
+            <div className="p-4 flex flex-col flex-1 gap-3">
+              <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4" />
+              <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-1/2" />
+              
+              <div className="flex gap-2 mt-auto">
+                <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded flex-1" />
+                <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded flex-1" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}

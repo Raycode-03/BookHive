@@ -8,8 +8,12 @@ interface BookCardWithActionProps {
   title: string;
   author: string;
   imageUrl: string;
+  packageType:string;
+  ctaLabel:string;
+  disabled:boolean;
   daysAvailable?: number;
   type?: string;
+  onClick:()=>void;
 }
 
 export const BookCardWithAction: React.FC<BookCardWithActionProps> = ({

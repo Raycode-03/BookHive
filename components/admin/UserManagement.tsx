@@ -272,13 +272,9 @@ const UserManagement = () => {
                       )}
                       
                       {/* Email */}
-                      <button
-                        onClick={() => {/* Implement email functionality */}}
-                        className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
-                        title="Send Email"
-                      >
-                        <Mail className="w-4 h-4" />
-                      </button>
+                      {/* <button onClick={() => {}    className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"title="Send Email"> */}
+                        {/* <Mail className="w-4 h-4" /> */}
+                      {/* </button> */}
                     </div>
                   </td>
                 </tr>
