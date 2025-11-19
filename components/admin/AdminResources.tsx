@@ -63,15 +63,15 @@ const AdminResources: React.FC = () => {
   return (
     <div className="p-6 space-y-6">
       {/* Search and Filter Bar */}
-      <div className="flex flex-col sm:flex-row gap-2 w-full">
-  <div className="relative flex-1 w-full sm:max-w-lg">
-    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+        <div className="flex flex-col sm:flex-row gap-4 w-full justify-between ">
+            <div className="relative flex-1 max-w-lg">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="text"
             placeholder="Search by title, author, or category..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg     focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
           />
         </div>
         
@@ -79,7 +79,7 @@ const AdminResources: React.FC = () => {
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as any)}
-            className="px-3 w-full py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            className="px-3 w-full py-2 border border-gray-300 dark:border-gray-600 rounded-lg  focus:border-blue-500 dark:bg-gray-700 dark:text-white"
           >
             <option value="all">All Books</option>
             <option value="free">Free Books</option>
