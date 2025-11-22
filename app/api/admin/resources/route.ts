@@ -142,7 +142,13 @@ export async function GET(req: Request) {
     
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search'); // Get search query
+    const page = Number(searchParams.get('page') || 1);
+    const limit = Number(searchParams.get('limit') || 10);
+
+    const skip = (page - 1) * limit;
+
     
+
     let query = {};
     if (search) {
       // Add search filter if search parameter exists
@@ -154,13 +160,16 @@ export async function GET(req: Request) {
         ]
       };
     }
-    
+    // Total count for pagination
+    const total = await db.collection('resources').countDocuments(query);
     // Return books (filtered if search exists)
     const books = await db.collection('resources')
       .find(query) // Use the query (empty {} if no search)
+      .skip(skip)
+      .limit(limit)
       .toArray();
 
-    return NextResponse.json(books, { status: 200 });
+    return NextResponse.json({books, total} , { status: 200 });
   } 
   catch (error: any) {
     const isDbError = error.message?.includes('MongoNetworkError') || error.message?.includes('ENOTFOUND');

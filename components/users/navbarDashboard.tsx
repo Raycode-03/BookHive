@@ -46,7 +46,6 @@ export default function NavbarDashboard({ user, pageTitle = "dashboard", searchB
     const userMenuRef = useRef<HTMLDivElement>(null)
     const searchInputRef = useRef<HTMLInputElement>(null)
     const mobileSearchInputRef = useRef<HTMLInputElement>(null)
-
     // Close handlers
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
@@ -151,10 +150,7 @@ export default function NavbarDashboard({ user, pageTitle = "dashboard", searchB
                             onClick={() => {
                                 // setQuery(word.snippet);
                                 // setShowSearchResults(false);
-                                const route = user?.isAdmin 
-                                ? `/admin/library?search=${encodeURIComponent(word.snippet)}`
-                                : `/resources?search=${encodeURIComponent(word.snippet)}`;
-                                
+                                const route = `/admin/library?search=${encodeURIComponent(word.snippet)}`
                                 router.push(route);
                                 setShowSearchResults(false);
                                 setQuery("");
@@ -178,9 +174,7 @@ export default function NavbarDashboard({ user, pageTitle = "dashboard", searchB
   const handleSearchSubmit = () => {
     if (query.trim()) {
       // Navigate to admin/resources with search query
-       const route = user?.isAdmin 
-      ? `/admin/library?search=${encodeURIComponent(query)}`
-      : `/resources?search=${encodeURIComponent(query)}`;    
+       const route = `/admin/library?search=${encodeURIComponent(query)}`
       router.push(route);
       setShowSearchResults(false);
       setQuery(""); // Clear the input

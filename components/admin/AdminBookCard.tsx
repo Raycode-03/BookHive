@@ -76,7 +76,7 @@ export const AdminBookCard: React.FC<AdminBookCardProps> = ({
   <Button
     variant="destructive"
     size="sm"
-    className="flex-1 dark:hover:bg-red-500"
+    className="flex-1 bg-red-600 dark:bg-red-500 dark:hover:bg-red-300"
     onClick={onDelete}
   >
     <Trash2 className="h-4 w-4" />

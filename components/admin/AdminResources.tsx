@@ -2,7 +2,7 @@
 import React, { useState, useEffect} from 'react'
 import { AdminBookCard } from '@/components/admin/AdminBookCard'
 import { BooksSkeleton } from '@/components/users/skeleton'
-import { BookOpen } from 'lucide-react'
+import { BookOpen ,  ChevronLeft, ChevronRight} from 'lucide-react'
 import { toast } from 'sonner'
 import EditBookCard from '@/components/admin/EditBookCard'
 import { Book } from '@/types/BookCard'
@@ -11,13 +11,15 @@ interface AdminResourcesProps {
   refetchTrigger?: number,
   optimisticBooks?: Book[] 
 }
-
 const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimisticBooks = [] }: AdminResourcesProps) => {
   const searchParams = useSearchParams(); // Add this
   const urlSearch = searchParams.get('search') || '';
+  // for the pagenation
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const [total, setTotal] = useState(0);
   const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState<'all' | 'free' | 'premium' | 'available' | 'unavailable'>('all')
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set()) // Track deleting books
   const [editingBook, setEditingBook] = useState<Book | null>(null) // ✅ Track editing book
@@ -30,11 +32,12 @@ const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimis
   const fetchBooks = async () => {
     try {
      const endpoint = urlSearch 
-        ? `/api/admin/resources?search=${encodeURIComponent(urlSearch)}`
-        : '/api/admin/resources';
+        ? `/api/admin/resources?search=${encodeURIComponent(urlSearch)}&page=${page}&limit=${limit}`
+        : `/api/admin/resources?page=${page}&limit=${limit}`;
       const response = await fetch(endpoint);
       const data = await response.json()
-      setBooks(data);
+      setBooks(data.books);  // <-- array for this page
+      setTotal(data.total); 
     } catch (error) {
       console.error('Failed to fetch books:', error)
     } finally {
@@ -43,7 +46,7 @@ const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimis
   }
   useEffect(() => {
     fetchBooks()
-  }, [refetchTrigger , urlSearch])
+  }, [refetchTrigger , urlSearch, page])
 
    const handleEdit = (book: Book) => {
     setEditingBook(book) // Set the book to edit
@@ -96,21 +99,28 @@ const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimis
       toast.error("Couldn't delete the Book")
     }
   }
+const totalPages = Math.ceil(total / limit);
+const maxVisiblePages = 5;
 
+const getVisiblePages = () => {
+  let start = Math.max(1, page - Math.floor(maxVisiblePages / 2));
+  let end = Math.min(totalPages, start + maxVisiblePages - 1);
+  
+  // Adjust start if we're near the end
+  start = Math.max(1, end - maxVisiblePages + 1);
+  
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+};
   // Filter books based on search and filter
   const filteredBooks = allBooks.filter(book => {
-    const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         book.category?.toLowerCase().includes(searchTerm.toLowerCase())
-    
     const matchesFilter = 
       filter === 'all' ? true :
       filter === 'free' ? book.packageType === 'free' :
       filter === 'premium' ? book.packageType === 'premium' :
-      filter === 'available' ? book.availableCopies > 0 :
+      filter === 'available' ? (book.availableCopies ?? 0)> 0 :
       filter === 'unavailable' ? book.availableCopies === 0 : true
     
-    return matchesSearch && matchesFilter
+    return matchesFilter
   })
 
   if (loading) {
@@ -126,7 +136,7 @@ const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimis
           </h2>
           <button
             onClick={() => window.location.href = '/admin/library'} // Clear search
-            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400"
+            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 cursor-pointer"
           >
             Clear search
           </button>
@@ -181,7 +191,7 @@ const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimis
         </div>
         <div className="bg-white dark:bg-green-900/20 p-4 rounded-lg border dark:border-green-800">
           <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-            {allBooks.filter(b => b.availableCopies > 0).length}
+            {allBooks.filter(b => ( b.availableCopies ?? 0 )> 0).length}
           </div>
           <div className="text-sm text-green-600 dark:text-green-400">Available</div>
         </div>
@@ -208,14 +218,6 @@ const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimis
             </span>
           )}
         </h2>
-        {searchTerm && (
-          <button
-            onClick={() => setSearchTerm('')}
-            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400"
-          >
-            Clear search
-          </button>
-        )}
       </div>
 
       {/* Books Grid */}
@@ -237,14 +239,79 @@ const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimis
           />
         ))}
       </div>
+     <div className="flex justify-center items-center gap-2 mt-6">
+  <button
+    onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+    disabled={page === 1}
+    className={`px-3 py-1 border rounded flex items-center gap-1 ${
+      page === 1 
+        ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed' 
+        : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600'
+    }`}
+  >
+    <ChevronLeft/>
+  </button>
+
+  {/* Show first page + ellipsis if needed */}
+  {getVisiblePages()[0] > 1 && (
+    <>
+      <button
+        onClick={() => setPage(1)}
+        className="px-3 py-1 border rounded bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+      >
+        1
+      </button>
+      {getVisiblePages()[0] > 2 && <span className="px-2">...</span>}
+    </>
+  )}
+
+  {/* Visible page numbers */}
+  {getVisiblePages().map(num => (
+    <button
+      key={num}
+      onClick={() => setPage(num)}
+      className={`px-3 py-1 border rounded ${
+        page === num 
+          ? 'bg-blue-600 text-white border-blue-600' 
+          : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600'
+      }`}
+    >
+      {num}
+    </button>
+  ))}
+
+  {/* Show last page + ellipsis if needed */}
+  {getVisiblePages()[getVisiblePages().length - 1] < totalPages && (
+    <>
+      {getVisiblePages()[getVisiblePages().length - 1] < totalPages - 1 && (
+        <span className="px-2">...</span>
+      )}
+      <button
+        onClick={() => setPage(totalPages)}
+        className="px-3 py-1 border rounded bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+      >
+        {totalPages}
+      </button>
+    </>
+  )}
+
+  <button
+    onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+    disabled={page === totalPages}
+    className={`px-3 py-1 border rounded flex items-center gap-1 ${
+      page === totalPages
+        ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed' 
+        : 'bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600'
+    }`}
+  >
+    <ChevronRight/>
+  </button>
+</div>
 
       {filteredBooks.length === 0 && (
         <div className="text-center py-12">
           <BookOpen className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No books found</h3>
-          <p className="text-gray-500 dark:text-gray-400">
-            {searchTerm ? 'Try adjusting your search terms' : 'No books match the current filter'}
-          </p>
         </div>
       )}
     </div>
