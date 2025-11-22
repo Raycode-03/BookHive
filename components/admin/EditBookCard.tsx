@@ -5,37 +5,36 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, X, Upload } from 'lucide-react'
+import { X, Upload } from 'lucide-react'
 import Image from 'next/image'
 import { toast } from "sonner"
+import { Book } from '@/types/BookCard'
 
-interface CreateResourceFormProps {
-  onSuccess?: () => void
-  onOptimisticCreate?: (bookData: any) => void
+interface EditBookCardProps {
+  book: Book
+  onSuccess: () => void
+  onCancel: () => void
 }
 
-export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSuccess ,onOptimisticCreate}) => {
+function EditBookCard({ book, onSuccess, onCancel }: EditBookCardProps) {
   const formRef = useRef<HTMLDivElement>(null);
-  const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
-    title: '',
-    author: '',
-    description: '',
-    category: '',
-    packageType: 'free',
-    totalCopies: 1,
-    isbn: ''
+    title: book.title || '',
+    author: book.author || '',
+    description: book.description || '',
+    category: book.category || '',
+    packageType: book.packageType || 'free',
+    totalCopies: book.totalCopies || 1,
+    isbn: book.isbn || ''
   })
   const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string>('')
+  const [imagePreview, setImagePreview] = useState<string>(book.imageUrl || '')
 
-  // ✅ Close form when clicking outside (but not when interacting with selects)
+  // Close form when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-
-      // ⛔ Ignore clicks on Radix Select popover or trigger
       if (
         target.closest('[data-radix-select-trigger]') ||
         target.closest('[data-radix-select-content]') ||
@@ -44,24 +43,16 @@ export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSucces
       ) {
         return;
       }
-
       if (formRef.current && !formRef.current.contains(target)) {
-        setIsOpen(false);
+        onCancel();
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [onCancel]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Validate that an image is selected
-    if (!imageFile) {
-      toast.error('Please select a cover image')
-      return
-    }
     
     // ✅ Validate required fields
     if (!formData.title || !formData.author || !formData.description || !formData.isbn) {
@@ -69,24 +60,10 @@ export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSucces
       return
     }
     
-    const tempBook = {
-    _id: `temp-${Date.now()}`,
-    title: formData.title,
-    author: formData.author,
-    description: formData.description,
-    category: formData.category,
-    packageType: formData.packageType,
-    totalCopies: formData.totalCopies,
-    availableCopies: formData.totalCopies,
-    isbn: formData.isbn,
-    imageUrl: imagePreview, // Use preview as temp image
-    createdAt: new Date().toISOString(),
-    isOptimistic: true // Flag for UI
-  }
-      onOptimisticCreate?.(tempBook)
     setLoading(true)
     try {
       const formDataToSend = new FormData()
+      formDataToSend.append('id', book._id) // ✅ Include book ID
       formDataToSend.append('title', formData.title)
       formDataToSend.append('author', formData.author)
       formDataToSend.append('description', formData.description)
@@ -94,38 +71,27 @@ export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSucces
       formDataToSend.append('packageType', formData.packageType)
       formDataToSend.append('totalCopies', formData.totalCopies.toString())
       formDataToSend.append('isbn', formData.isbn)
-      formDataToSend.append('image', imageFile)
+      
+      // Only append image if a new one was selected
+      if (imageFile) {
+        formDataToSend.append('image', imageFile)
+      }
       
       const response = await fetch('/api/admin/resources', {
-        method: 'POST',
+        method: 'PUT',
         body: formDataToSend
       })
       
       if (response.ok) {
-        // Reset form
-        setFormData({
-          title: '',
-          author: '',
-          description: '',
-          category: '',
-          packageType: 'free',
-          totalCopies: 1,
-          isbn: ''
-        })
-        setImageFile(null)
-        setImagePreview('')
-        setIsOpen(false)
-        
-        // Call success callback to trigger refetch
-        onSuccess?.()
-        toast.success("New resource created successfully!")
+        onSuccess()
+        toast.success("Book updated successfully!")
       } else {
         const error = await response.json();
-        toast.error(`Failed to create resource: ${error.message || 'Unknown error'}`)
+        toast.error(`Failed to update book: ${error.message || 'Unknown error'}`)
       }
     } catch (error) {
-      console.error('Failed to create resource:', error)
-      toast.error('Failed to create resource. Please try again.')
+      console.error('Failed to update book:', error)
+      toast.error('Failed to update book. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -139,7 +105,6 @@ export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSucces
     const file = e.target.files?.[0]
     if (file) {
       setImageFile(file)
-      
       // Create preview for selected file
       const reader = new FileReader()
       reader.onload = (e) => {
@@ -151,34 +116,24 @@ export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSucces
 
   const clearImage = () => {
     setImageFile(null)
-    setImagePreview('')
-  }
-
-  if (!isOpen) {
-    return (
-      <Button onClick={() => setIsOpen(true)} className="flex items-center gap-2 dark:text-gray-300 dark:hover:bg-blue-700 hover:bg-blue-400 hover:text-gray-200">
-        <Plus className="w-4 h-4" />
-        Add New Resource
-      </Button>
-    )
+    setImagePreview(book.imageUrl || '') // Reset to original image
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 bg-opacity-50 flex items-center justify-center z-50 p-4">
+     <div className="fixed inset-0 bg-black/60 bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-[34rem] min-h-[400px] max-h-[60vh] overflow-y-auto" ref={formRef}>
-        <div className="flex justify-between flex-col items-center mb-4">
-          <h2 className="text-xl font-semibold">Add New Resource</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Edit Book</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* ... (rest of your form JSX remains the same) ... */}
           <div>
             <Label htmlFor="title">Title *</Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => handleChange('title', e.target.value)}
-              
+              required
             />
           </div>
 
@@ -188,7 +143,7 @@ export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSucces
               id="author"
               value={formData.author}
               onChange={(e) => handleChange('author', e.target.value)}
-              
+              required
             />
           </div>
 
@@ -199,7 +154,7 @@ export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSucces
               value={formData.description}
               onChange={(e) => handleChange('description', e.target.value)}
               rows={3}
-               
+              required
             />
           </div>
 
@@ -209,14 +164,13 @@ export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSucces
               id="isbn"
               value={formData.isbn}
               onChange={(e) => handleChange('isbn', e.target.value)}
-              
+              required
             />
           </div>
 
           {/* Image Upload Section */}
           <div className="space-y-3">
-            <Label className="text-gray-700 dark:text-gray-300">Cover Image *</Label>
-            
+            <Label className="text-gray-700 dark:text-gray-300">Cover Image</Label>
             <div 
               className={`
                 relative border-2 border-dashed rounded-lg p-4 text-center cursor-pointer
@@ -235,7 +189,6 @@ export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSucces
                 accept="image/*"
                 onChange={handleImageChange}
                 className="hidden"
-                
               />
 
               {imagePreview ? (
@@ -260,11 +213,8 @@ export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSucces
                   </div>
                   
                   <div className="flex justify-between items-center text-sm">
-                    <span className="truncate flex-1 text-left mr-2 text-gray-600 dark:text-gray-400">
-                      {imageFile?.name}
-                    </span>
                     <span className="text-blue-600 dark:text-blue-400 text-xs font-medium">
-                      Click to change
+                      {imageFile ? 'New image selected - Click to change' : 'Current image - Click to change'}
                     </span>
                   </div>
                 </div>
@@ -273,7 +223,7 @@ export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSucces
                   <Upload className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-3 group-hover:text-gray-500 dark:group-hover:text-gray-400" />
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Select cover image
+                      Select new cover image (optional)
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Click to upload or drag and drop
@@ -311,7 +261,7 @@ export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSucces
           </div>
 
           <div>
-            <Label htmlFor="totalCopies">Total Copies</Label>
+            <Label htmlFor="totalCopies">Total Copies (must be more than current {formData.totalCopies})</Label>
             <Input
               id="totalCopies"
               type="number"
@@ -325,26 +275,14 @@ export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSucces
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => {
-                setIsOpen(false); 
-                setFormData({
-                  title: '',
-                  author: '',
-                  description: '',
-                  category: '',
-                  packageType: 'free',
-                  totalCopies: 1,
-                  isbn: ''
-                });
-                setImageFile(null);
-                setImagePreview('');
-              }} 
+              onClick={onCancel}
               className="flex-1"
+              disabled={loading}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="flex-1 dark:text-gray-300 dark:hover:bg-blue-700">
-              {loading ? 'Adding...' : 'Add Resource'}
+            <Button type="submit" disabled={loading} className="flex-1">
+              {loading ? 'Updating...' : 'Update Book'}
             </Button>
           </div>
         </form>
@@ -353,4 +291,4 @@ export const CreateResourceForm: React.FC<CreateResourceFormProps> = ({ onSucces
   )
 }
 
-export default CreateResourceForm
+export default EditBookCard

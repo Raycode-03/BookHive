@@ -1,47 +1,105 @@
 "use client"
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect} from 'react'
 import { AdminBookCard } from '@/components/admin/AdminBookCard'
 import { BooksSkeleton } from '@/components/users/skeleton'
-import { Search, Filter, Crown, BookOpen } from 'lucide-react'
+import { Search, BookOpen } from 'lucide-react'
+import { toast } from 'sonner'
+import EditBookCard from '@/components/admin/EditBookCard'
+import { Book } from '@/types/BookCard'
 
-interface Book {
-  _id: string
-  title: string
-  author: string
-  imageUrl: string
-  description?: string
-  category?: string
-  packageType: string
-  totalCopies: number
-  availableCopies: number
-  isbn?: string
-  createdAt: string
+interface AdminResourcesProps  extends Book{
+  title:string,
+  author:string,
+  imageUrl:string,
+  packageType:string,
+  availableCopies:number,
+  totalCopies:number,
+  refetchTrigger?: number,
+  optimisticBooks?: Book[] 
 }
 
-const AdminResources: React.FC = () => {
+const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimisticBooks = [] }: AdminResourcesProps) => {
   const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState<'all' | 'free' | 'premium' | 'available' | 'unavailable'>('all')
-
-  useEffect(() => {
-    fetchBooks()
-  }, [])
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set()) // Track deleting books
+  const [editingBook, setEditingBook] = useState<Book | null>(null) // ✅ Track editing book
+  // Combine books and filter out any that are being deleted
+  const allBooks = [
+    ...books.filter(book => !deletingIds.has(book._id)), 
+    ...externalOptimisticBooks.filter(book => !deletingIds.has(book._id))
+  ]
 
   const fetchBooks = async () => {
     try {
       const response = await fetch('/api/admin/resources')
       const data = await response.json()
-      setBooks(data)
+      setBooks(data);
     } catch (error) {
       console.error('Failed to fetch books:', error)
     } finally {
       setLoading(false)
     }
   }
+  useEffect(() => {
+    fetchBooks()
+  }, [refetchTrigger])
+
+   const handleEdit = (book: Book) => {
+    setEditingBook(book) // Set the book to edit
+  }
+
+  // ✅ Handle when edit is completed
+  const handleEditComplete = () => {
+    setEditingBook(null) // Close edit modal
+    fetchBooks() // Refresh the book list
+  }
+
+  // ✅ Handle when edit is cancelled
+  const handleEditCancel = () => {
+    setEditingBook(null) // Close edit modal
+  }
+
+  const handleDelete = async (id: string) => {
+    // Optimistically remove the book immediately
+    setDeletingIds(prev => new Set(prev).add(id))
+    
+    try {
+      const res = await fetch('/api/admin/resources', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({ id }),
+      })  
+      
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to delete');
+      }
+      
+      toast.success('Book deleted successfully');
+      // Refresh the list to get the updated data from server
+      await fetchBooks();
+      setDeletingIds(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(id)
+        return newSet
+      })
+    } catch (err) {
+      // If there's an error, add the book back
+      setDeletingIds(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(id)
+        return newSet
+      })
+      toast.error("Couldn't delete the Book")
+    }
+  }
 
   // Filter books based on search and filter
-  const filteredBooks = books.filter(book => {
+  const filteredBooks = allBooks.filter(book => {
     const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          book.category?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -62,16 +120,23 @@ const AdminResources: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6">
+       {editingBook && (
+        <EditBookCard 
+          book={editingBook}
+          onSuccess={handleEditComplete}
+          onCancel={handleEditCancel}
+        />
+      )}
       {/* Search and Filter Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 w-full justify-between ">
-            <div className="relative flex-1 max-w-lg">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+      <div className="flex flex-col sm:flex-row gap-4 w-full justify-between">
+        <div className="relative flex-1 max-w-lg">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="text"
             placeholder="Search by title, author, or category..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg     focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
           />
         </div>
         
@@ -79,7 +144,7 @@ const AdminResources: React.FC = () => {
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as any)}
-            className="px-3 w-full py-2 border border-gray-300 dark:border-gray-600 rounded-lg  focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            className="px-3 w-full py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-700 dark:text-white"
           >
             <option value="all">All Books</option>
             <option value="free">Free Books</option>
@@ -93,24 +158,24 @@ const AdminResources: React.FC = () => {
       {/* Stats Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-blue-900/20 p-4 rounded-lg border dark:border-blue-800">
-          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{books.length}</div>
+          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{allBooks.length}</div>
           <div className="text-sm text-blue-600 dark:text-blue-400">Total Books</div>
         </div>
         <div className="bg-white dark:bg-purple-900/20 p-4 rounded-lg border dark:border-purple-800">
           <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-            {books.filter(b => b.packageType === 'premium').length}
+            {allBooks.filter(b => b.packageType === 'premium').length}
           </div>
           <div className="text-sm text-purple-600 dark:text-purple-400">Premium Books</div>
         </div>
         <div className="bg-white dark:bg-green-900/20 p-4 rounded-lg border dark:border-green-800">
           <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-            {books.filter(b => b.availableCopies > 0).length}
+            {allBooks.filter(b => b.availableCopies > 0).length}
           </div>
           <div className="text-sm text-green-600 dark:text-green-400">Available</div>
         </div>
         <div className="bg-white dark:bg-red-900/20 p-4 rounded-lg border dark:border-red-800">
           <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-            {books.filter(b => b.availableCopies === 0).length}
+            {allBooks.filter(b => b.availableCopies === 0).length}
           </div>
           <div className="text-sm text-red-600 dark:text-red-400">Unavailable</div>
         </div>
@@ -119,7 +184,17 @@ const AdminResources: React.FC = () => {
       {/* Results Count */}
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">
-          Showing {filteredBooks.length} of {books.length} books
+          Showing {filteredBooks.length} of {allBooks.length} books
+          {externalOptimisticBooks.length > 0 && (
+            <span className="text-sm text-blue-500 ml-2">
+              ({externalOptimisticBooks.length} updating...)
+            </span>
+          )}
+          {deletingIds.size > 0 && (
+            <span className="text-sm text-orange-500 ml-2">
+              ({deletingIds.size} deleting...)
+            </span>
+          )}
         </h2>
         {searchTerm && (
           <button
@@ -136,14 +211,17 @@ const AdminResources: React.FC = () => {
         {filteredBooks.map(book => (
           <AdminBookCard
             key={book._id}
+            _id={book._id}
             title={book.title}
             author={book.author}
             imageUrl={book.imageUrl}
             packageType={book.packageType}
             availableCopies={book.availableCopies}
             totalCopies={book.totalCopies}
-            onEdit={() => console.log('Edit', book._id)}
-            onDelete={() => console.log('Delete', book._id)}
+            createdAt={book.createdAt}
+            isOptimistic={book._id.startsWith('temp-') || book.isOptimistic || deletingIds.has(book._id)}
+            onEdit={() => handleEdit(book)}
+            onDelete={() => handleDelete(book._id)}
           />
         ))}
       </div>

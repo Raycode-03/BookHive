@@ -3,25 +3,20 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Crown } from "lucide-react";
-
-interface BookCardWithActionProps {
-  title: string;
-  author: string;
-  imageUrl: string;
-  packageType:string;
-  ctaLabel:string;
-  disabled:boolean;
-  daysAvailable?: number;
-  type?: string;
-  onClick:()=>void;
-}
+import { Book } from "@/types/BookCard";
+  interface BookCardWithActionProps extends Pick<Book,  'title' | 'author' | 'imageUrl' | 'packageType'> {
+    ctaLabel:string;
+    disabled:boolean;
+    daysAvailable?: number;
+    onClick:()=>void;
+  }
 
 export const BookCardWithAction: React.FC<BookCardWithActionProps> = ({
   title,
   author,
   imageUrl,
   daysAvailable,
-  type,
+  packageType,
 }) => {
   const [saved, setSaved] = useState(false);
   const [reserved, setReserved] = useState(false);
@@ -33,7 +28,7 @@ export const BookCardWithAction: React.FC<BookCardWithActionProps> = ({
       </div>
 
       <div className="p-4 flex flex-col flex-1 relative gap-2">
-        {type === "premium" && (
+        {packageType === "premium" && (
           <div className="absolute top-2 right-2 bg-yellow-100 rounded-full p-1 shadow-sm">
             <Crown className="h-4 w-4 text-yellow-500" />
           </div>

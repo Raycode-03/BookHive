@@ -3,17 +3,18 @@ import React from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Crown, Edit, Trash2 } from 'lucide-react'
-import { useIsMobile } from '@/hooks/use-mobile'
-
-interface AdminBookCardProps {
+import { Book } from '@/types/BookCard'
+interface AdminBookCardProps extends Book {
+   _id: string
   title: string
   author: string
   imageUrl: string
-  packageType?: string
+  packageType: string
   availableCopies: number
   totalCopies: number
   onEdit: () => void
   onDelete: () => void
+  isOptimistic?: boolean
 }
 
 export const AdminBookCard: React.FC<AdminBookCardProps> = ({
@@ -25,12 +26,13 @@ export const AdminBookCard: React.FC<AdminBookCardProps> = ({
   totalCopies,
   onEdit,
   onDelete,
+  isOptimistic = false
 }) => {
-  const isMobile = useIsMobile()
 
   return (
-    <div className="w-full bg-white dark:bg-gray-800 shadow-md rounded-2xl overflow-hidden transition-all flex flex-col hover:shadow-lg">
-      
+      <div className={` relative rounded-lg border bg-white dark:bg-gray-800 shadow-sm transition-all flex flex-col
+    ${isOptimistic ? 'opacity-70 animate-pulse' : 'hover:shadow-md'}`}>
+
       {/* Book Image */}
       <div className="relative h-40 w-full">
         <Image
@@ -66,7 +68,7 @@ export const AdminBookCard: React.FC<AdminBookCardProps> = ({
   <Button
     variant="outline"
     size="sm"
-    className="flex-1"
+    className="flex-1 hover:bg-gray-300 dark:hover:bg-gray-600"
     onClick={onEdit}
   >
     <Edit className="h-4 w-4" />
@@ -74,7 +76,7 @@ export const AdminBookCard: React.FC<AdminBookCardProps> = ({
   <Button
     variant="destructive"
     size="sm"
-    className="flex-1"
+    className="flex-1 dark:hover:bg-red-500"
     onClick={onDelete}
   >
     <Trash2 className="h-4 w-4" />

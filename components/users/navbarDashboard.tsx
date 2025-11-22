@@ -17,9 +17,10 @@ interface NavbarProps {
         packageType: string;
     }
     pageTitle?: string;
+    searchBooks?:boolean;
 }
 
-export default function NavbarDashboard({ user  , pageTitle="dashboard"}: NavbarProps ) {
+export default function NavbarDashboard({ user  , pageTitle="dashboard" , searchBooks}: NavbarProps ) {
    const { theme, setTheme } = useTheme();
        const [mounted, setMounted] = useState(false);
        useEffect(() => setMounted(true), []);
@@ -178,7 +179,8 @@ export default function NavbarDashboard({ user  , pageTitle="dashboard"}: Navbar
               className="cursor-pointer px-3 py-2 rounded-md hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                
+                  <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
                 <span className="text-sm text-gray-700">{word.snippet}</span>
               </div>
             </li>
@@ -214,7 +216,10 @@ export default function NavbarDashboard({ user  , pageTitle="dashboard"}: Navbar
               onClick={() => setShowSearchMobile(true)}
               className="p-2 rounded-lg hover:bg-gray-100 transition-colors ml-auto md:ml-0"
             >
-              <Search className="w-5 h-5 text-gray-600" />
+              {searchBooks===true &&(
+                  <Search className="w-5 h-5 text-gray-600" />
+              )}
+              
             </button>
           )}
         </div>
@@ -222,10 +227,13 @@ export default function NavbarDashboard({ user  , pageTitle="dashboard"}: Navbar
         {/* Desktop Search - Moved to the right */}
         {!isMobileDevice && (
           <div className="flex items-center gap-4">
-            <div className="relative" ref={searchRef}>
+
+           {searchBooks &&(
+               <div className="relative" ref={searchRef}>
               <SearchBar />
               <SearchResults />
             </div>
+           )}
 
             {/* Right Section - Icons & User Menu */}
             <div className="flex items-center gap-2">
@@ -379,7 +387,10 @@ export default function NavbarDashboard({ user  , pageTitle="dashboard"}: Navbar
             ref={searchRef}
           >
             <div className="flex-1 mr-3">
-              <SearchBar isMobile={true} />
+              {searchBooks &&(
+                  <SearchBar isMobile={true} />
+              )}
+              
             </div>
             <button 
               onClick={() => {

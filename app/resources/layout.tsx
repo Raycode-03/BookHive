@@ -14,7 +14,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
     <SidebarProvider>
       <AppSidebar userRole={user.isAdmin ? "admin" : "user"} />
       <SidebarInset>
-        <NavbarDashboard user={user} pageTitle="Resources"/>
+        <NavbarDashboard user={user} pageTitle="Resources" searchBooks={true}/>
         <div style={{ paddingTop: NAVBAR_HEIGHT }}>
           {children}
         </div>

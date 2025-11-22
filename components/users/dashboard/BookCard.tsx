@@ -2,17 +2,13 @@ import React from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Crown } from 'lucide-react'
-
-interface BookCardProps {
-  title: string
-  author: string
-  imageUrl: string
+import { Book } from '@/types/BookCard'
+interface BookCardProps  extends Book{
   daysAvailable?: number
   daysRemaining?: number
   overdueDays?: number
   isOverdue?: boolean
   borrowFee?: number
-  packageType?: string
   ctaLabel: string
   onClick?: () => void
 }
