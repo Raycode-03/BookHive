@@ -2,23 +2,19 @@
 import React, { useState, useEffect} from 'react'
 import { AdminBookCard } from '@/components/admin/AdminBookCard'
 import { BooksSkeleton } from '@/components/users/skeleton'
-import { Search, BookOpen } from 'lucide-react'
+import { BookOpen } from 'lucide-react'
 import { toast } from 'sonner'
 import EditBookCard from '@/components/admin/EditBookCard'
 import { Book } from '@/types/BookCard'
-
-interface AdminResourcesProps  extends Book{
-  title:string,
-  author:string,
-  imageUrl:string,
-  packageType:string,
-  availableCopies:number,
-  totalCopies:number,
+import { useSearchParams } from 'next/navigation';
+interface AdminResourcesProps {
   refetchTrigger?: number,
   optimisticBooks?: Book[] 
 }
 
 const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimisticBooks = [] }: AdminResourcesProps) => {
+  const searchParams = useSearchParams(); // Add this
+  const urlSearch = searchParams.get('search') || '';
   const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -33,7 +29,10 @@ const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimis
 
   const fetchBooks = async () => {
     try {
-      const response = await fetch('/api/admin/resources')
+     const endpoint = urlSearch 
+        ? `/api/admin/resources?search=${encodeURIComponent(urlSearch)}`
+        : '/api/admin/resources';
+      const response = await fetch(endpoint);
       const data = await response.json()
       setBooks(data);
     } catch (error) {
@@ -44,7 +43,7 @@ const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimis
   }
   useEffect(() => {
     fetchBooks()
-  }, [refetchTrigger])
+  }, [refetchTrigger , urlSearch])
 
    const handleEdit = (book: Book) => {
     setEditingBook(book) // Set the book to edit
@@ -120,6 +119,19 @@ const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimis
 
   return (
     <div className="p-6 space-y-6">
+       {urlSearch && (
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">
+            Search results for: &apos; {urlSearch} &apos;
+          </h2>
+          <button
+            onClick={() => window.location.href = '/admin/library'} // Clear search
+            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400"
+          >
+            Clear search
+          </button>
+        </div>
+      )}
        {editingBook && (
         <EditBookCard 
           book={editingBook}
@@ -129,7 +141,7 @@ const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimis
       )}
       {/* Search and Filter Bar */}
       <div className="flex flex-col sm:flex-row gap-4 w-full justify-between">
-        <div className="relative flex-1 max-w-lg">
+        {/* <div className="relative flex-1 max-w-lg">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="text"
@@ -138,7 +150,7 @@ const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimis
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
           />
-        </div>
+        </div> */}
         
         <div className="flex flex-wrap gap-2">
           <select
@@ -209,7 +221,7 @@ const AdminResources = ({  refetchTrigger = 0,  optimisticBooks: externalOptimis
       {/* Books Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {filteredBooks.map(book => (
-          <AdminBookCard
+           <AdminBookCard
             key={book._id}
             _id={book._id}
             title={book.title}

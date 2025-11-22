@@ -10,8 +10,8 @@ interface AdminBookCardProps extends Book {
   author: string
   imageUrl: string
   packageType: string
-  availableCopies: number
-  totalCopies: number
+  availableCopies?: number
+  totalCopies?: number
   onEdit: () => void
   onDelete: () => void
   isOptimistic?: boolean

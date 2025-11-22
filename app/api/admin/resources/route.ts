@@ -3,14 +3,18 @@ import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import cloudinary from "@/lib/cloudinary";
 
-async function uploadFileToCloudinaryWithRetry(file: File, folder: string, resourceType = "image", maxRetries = 3) {
+async function uploadFileToCloudinaryWithRetry(file: File, folder: string,  maxRetries = 3) {
   let lastError;
-  
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       // Validate file first
       if (!file || !file.type || file.size === 0) {
         throw new Error('Invalid file provided');
+      }
+
+      // Validate it's an image
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Only image files are allowed');
       }
 
       const buffer = Buffer.from(await file.arrayBuffer());
@@ -23,29 +27,29 @@ async function uploadFileToCloudinaryWithRetry(file: File, folder: string, resou
         const nameWithoutExt = filename.replace(/\.[^/.]+$/, "");
         // Replace invalid characters with underscores
         return nameWithoutExt
-          .replace(/[#%&{}\\<>*?/$!'":@+`|=]/g, '_') // Replace special chars
-          .replace(/\s+/g, '_') // Replace spaces with underscores
-          .replace(/_{2,}/g, '_') // Replace multiple underscores with single
-          .substring(0, 100); // Limit length
+          .replace(/[#%&{}\\<>*?/$!'":@+`|=]/g, '_')
+          .replace(/\s+/g, '_')
+          .replace(/_{2,}/g, '_')
+          .substring(0, 100);
       };
 
       const sanitizedPublicId = sanitizeFilename(file.name);
 
       const uploadOptions = {
         folder: folder,
-        resource_type: resourceType,
-        timeout: resourceType === 'video' ? 180000 : 60000,
+        resource_type: "image" as const, // ✅ Fixed: explicitly set to "image"
+        timeout: 60000, // No need for video timeout
         quality: "auto:best",
         fetch_format: "auto",
         use_filename: false,
         unique_filename: true,
-        public_id: sanitizedPublicId, // ✅ Use sanitized filename
+        public_id: sanitizedPublicId,
       };
 
       const result = await cloudinary.uploader.upload(dataUri, uploadOptions);
       return result;
       
-    } catch (error) {
+    } catch (error:any) {
       lastError = error;
       console.warn(`Upload attempt ${attempt} failed:`, error?.message || error);
       
@@ -93,7 +97,6 @@ async function uploadFileToCloudinaryWithRetry(file: File, folder: string, resou
         const uploadResult = await uploadFileToCloudinaryWithRetry(
           imageFile,
           "BookHive/books", 
-          "image"
         );
         finalImageUrl = uploadResult.secure_url;
       } catch (error) {
@@ -132,18 +135,32 @@ async function uploadFileToCloudinaryWithRetry(file: File, folder: string, resou
       }, { status: 500 });
     }
   }
-
-export async function GET() {
+export async function GET(req: Request) {
   try {
     await connect_db();
     const db = get_db();
     
-    // Return ALL books with ALL fields for admin
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get('search'); // Get search query
+    
+    let query = {};
+    if (search) {
+      // Add search filter if search parameter exists
+      query = {
+        $or: [
+          { title: { $regex: search, $options: 'i' } },
+          { author: { $regex: search, $options: 'i' } },
+          { category: { $regex: search, $options: 'i' } }
+        ]
+      };
+    }
+    
+    // Return books (filtered if search exists)
     const books = await db.collection('resources')
-      .find({})
+      .find(query) // Use the query (empty {} if no search)
       .toArray();
 
-    return NextResponse.json(books, { status: 200 }); // ✅ Correct status setting
+    return NextResponse.json(books, { status: 200 });
   } 
   catch (error: any) {
     const isDbError = error.message?.includes('MongoNetworkError') || error.message?.includes('ENOTFOUND');
@@ -185,7 +202,6 @@ export async function GET() {
       }, { status: 500 });
     }
   }
-
   export async function PUT(req:Request){
   try {
   await connect_db();
@@ -239,7 +255,6 @@ export async function GET() {
         const uploadResult = await uploadFileToCloudinaryWithRetry(
           imageFile,
           "BookHive/books", 
-          "image"
         );
         updateBook.imageUrl = uploadResult.secure_url;
       } catch (error) {

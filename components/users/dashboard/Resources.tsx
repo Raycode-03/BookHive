@@ -32,6 +32,7 @@ const Resources: React.FC = () => {
       {books.map(book => (
         <BookCard
           key={book._id}
+          _id={book._id}
           title={book.title}
           author={book.author}
           imageUrl={book.imageUrl}

@@ -16,8 +16,8 @@ export default async function Layout({ children }: { children: React.ReactNode }
           redirect("/login")
         }
   return (
-    <SidebarProvider>
-      <AppSidebar />
+    <SidebarProvider  defaultOpen={false}>
+      <AppSidebar userRole={user?.isAdmin ? "admin": "user"} />
       <SidebarInset>
            <Navbar user={user}/>
         <div style={{ paddingTop: NAVBAR_HEIGHT }}>

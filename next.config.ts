@@ -29,9 +29,7 @@ const nextConfig: NextConfig = {
   },
   // Increase these timeouts:
   staticPageGenerationTimeout: 300, // 5 minutes
-  experimental: {
-    serverComponentsExternalPackages: ["sharp", "onnxruntime"],
-  },
+    serverExternalPackages: ["sharp", "onnxruntime"],
 
   eslint: {
     ignoreDuringBuilds: true,

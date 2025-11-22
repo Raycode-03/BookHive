@@ -6,9 +6,11 @@ export interface Book {
   description?: string
   category?: string
   packageType: string
-  totalCopies: number
-  availableCopies: number
   isbn?: string
-  createdAt: string
   isOptimistic?: boolean
+   totalCopies?: number;
+  availableCopies?: number;
+  createdAt?: string;
+  isOverdue?: boolean;
+  overdueDays?: number;
 }

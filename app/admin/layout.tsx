@@ -3,8 +3,9 @@ import NavbarDashboard from "@/components/users/navbarDashboard";
 import { AppSidebar } from "@/components/users/sidebar";
 import { getUnifiedSession } from "@/lib/getUnifiedSession";
 import { redirect } from "next/navigation";
-
+import { connect_db } from "@/lib/mongodb";
 export default async function Layout({ children }: { children: React.ReactNode }) {
+   await connect_db();
   const NAVBAR_HEIGHT = 84; // Reduced for better spacing
   const session = await getUnifiedSession();
   if (!session) {
@@ -14,8 +15,8 @@ export default async function Layout({ children }: { children: React.ReactNode }
   const user = session.user;
 
   return (
-    <SidebarProvider>
-      <AppSidebar userRole={user.isAdmin ? "admin": ""} />
+    <SidebarProvider  defaultOpen={false}>
+      <AppSidebar userRole={user.isAdmin ? "admin": "user"} />
       <SidebarInset>
         <NavbarDashboard user={user} pageTitle="Admin Dashboard"/>
         <div style={{ paddingTop: NAVBAR_HEIGHT }}>
