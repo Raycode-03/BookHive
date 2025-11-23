@@ -14,14 +14,7 @@ async function page() {
 
               return(
                 <div className='px-7 py-4'>
-                    {/* <Newpost user={user}/>
-                    <Posts user={user} /> */}
-
-                    {/*dont forget to send this to the user account settigns to signout  */}
-                    {/* <button className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-medium shadow-md transition-all duration-200 border border-amber-400 flex items-center gap-2">
-                        <SignOutBtn />
-                    </button> */}
-
+                  
                 </div>
               )
   }

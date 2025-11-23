@@ -1,16 +1,37 @@
-// app/api/resources/route.ts
-import {connect_db , get_db} from "@/lib/mongodb"
+import { connect_db, get_db } from "@/lib/mongodb"
 import { NextResponse } from "next/server";
+
 export async function GET(req: Request) {
   try {
     await connect_db();
     const db = get_db();
     
-    // Only return available books with public fields
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get('search') || '';
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    
+    const skip = (page - 1) * limit;
+
+    // Build query for available books
+    let query: any = { availableCopies: { $gt: 0 } };
+    
+    // Add search filter if provided
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { author: { $regex: search, $options: 'i' } },
+        { category: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Get total count for pagination
+    const total = await db.collection('resources').countDocuments(query);
+    
+    // Fetch books with pagination
     const books = await db.collection('resources')
-      .find({ availableCopies: { $gt: 0 } }) // Only available books
+      .find(query)
       .project({
-        // Only public fields - no sensitive admin data
         title: 1,
         author: 1,
         imageUrl: 1,
@@ -18,11 +39,21 @@ export async function GET(req: Request) {
         category: 1,
         packageType: 1,
         availableCopies: 1
-        // Don't include: totalCopies, isbn, createdAt, etc.
       })
+      .sort({ createdAt: -1 }) // Optional: sort by creation date
+      .skip(skip)
+      .limit(limit)
       .toArray();
 
-    return NextResponse.json(books);
+    const hasMore = page * limit < total;
+
+    return NextResponse.json({
+      books: books,
+      hasMore,
+      currentPage: page,
+      total
+    });
+    
   } catch (error: any) {
     const isDbError = error.message?.includes('MongoNetworkError') || error.message?.includes('ENOTFOUND');
     console.error("Error fetching resources:", error);

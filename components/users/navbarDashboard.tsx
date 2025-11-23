@@ -1,7 +1,7 @@
 "use client"
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { Bell, Search, X, LogOut, User } from "lucide-react"
+import { Bell, Search, LogOut, User } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { UserAvatar } from "./userAvatar"
 import { Sun, Moon } from "lucide-react";
@@ -150,7 +150,10 @@ export default function NavbarDashboard({ user, pageTitle = "dashboard", searchB
                             onClick={() => {
                                 // setQuery(word.snippet);
                                 // setShowSearchResults(false);
-                                const route = `/admin/library?search=${encodeURIComponent(word.snippet)}`
+                                const route = user?.isAdmin 
+                                ? `/admin/library?search=${encodeURIComponent(word.snippet)}`
+                                : `/resources?search=${encodeURIComponent(word.snippet)}`;
+                                
                                 router.push(route);
                                 setShowSearchResults(false);
                                 setQuery("");
@@ -174,7 +177,11 @@ export default function NavbarDashboard({ user, pageTitle = "dashboard", searchB
   const handleSearchSubmit = () => {
     if (query.trim()) {
       // Navigate to admin/resources with search query
-       const route = `/admin/library?search=${encodeURIComponent(query)}`
+       const route = user?.isAdmin
+       ?`/admin/library?search=${encodeURIComponent(query)}`
+       : `/resources?search=${encodeURIComponent(query)}`;
+       
+      
       router.push(route);
       setShowSearchResults(false);
       setQuery(""); // Clear the input

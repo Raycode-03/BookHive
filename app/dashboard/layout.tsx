@@ -14,7 +14,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
   const user = session.user;
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <AppSidebar userRole={user.isAdmin ? "admin" : "user"} />
       <SidebarInset>
         <NavbarDashboard user={user} pageTitle="Dashboard"/>

@@ -8,6 +8,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
   }
 
   const user = session.user;
+  
 
   return (
     <>

@@ -11,9 +11,10 @@ export default async function Layout({ children }: { children: React.ReactNode }
   if (!session) {
     return redirect("/login");
   }
-
   const user = session.user;
-
+  if(user.isAdmin===false){
+      return redirect("/login");
+  }
   return (
     <SidebarProvider  defaultOpen={false}>
       <AppSidebar userRole={user.isAdmin ? "admin": "user"} />

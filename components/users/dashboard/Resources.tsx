@@ -2,29 +2,14 @@
 import React, { useState, useEffect } from 'react'
 import { BookCard } from './BookCard'
 import { Book } from '@/types/BookCard'
-
+import { BooksSkeleton } from '@/components/users/skeleton';
 const Resources: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchBooks()
-  }, [])
-
-  const fetchBooks = async () => {
-    try {
-      const response = await fetch('/api/resources')
-      const data = await response.json()
-      setBooks(data)
-    } catch (error) {
-      console.error('Failed to fetch books:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   if (loading) {
-    return <div>Loading resources...</div>
+    return <BooksSkeleton count={8} />
   }
 
   return (
