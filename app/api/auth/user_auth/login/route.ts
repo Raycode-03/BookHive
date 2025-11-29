@@ -69,7 +69,11 @@
 
                 return response;
             } catch (error:any) {
-                 const isDbError = error.message?.includes('MongoNetworkError') || error.message?.includes('ENOTFOUND');
+                 const isDbError =
+                  error.message?.includes('MongoNetworkError') ||
+                   error.message?.includes('ENOTFOUND') || 
+                   error.message?.includes('ETIMEOUT') || 
+                   error.message?.includes('queryTxt');;
                     console.error("Error registering user:", error);
                     return NextResponse.json({ error: isDbError ? "Network unavailable" : "Internal server error" }, {status: 500});
                 }

@@ -26,7 +26,10 @@ export async function PUT(req: Request) {
     return NextResponse.json({ message: "User promoted to admin successfully", },{status:200});
 
   } catch (error: any) {
-    const isDbError = error.message?.includes('MongoNetworkError') || error.message?.includes('ENOTFOUND');
+    const isDbError = error.message?.includes('MongoNetworkError') ||
+                   error.message?.includes('ENOTFOUND') || 
+                   error.message?.includes('ETIMEOUT') || 
+                   error.message?.includes('queryTxt');;
     console.error("Error making user admin:", error);
     return NextResponse.json({ 
       error: isDbError ? "Network unavailable" : "Internal server error" 

@@ -128,7 +128,10 @@ async function uploadFileToCloudinaryWithRetry(file: File, folder: string,  maxR
       });
 
     } catch (error: any) {
-      const isDbError = error.message?.includes('MongoNetworkError') || error.message?.includes('ENOTFOUND');
+      const isDbError = error.message?.includes('MongoNetworkError') ||
+                   error.message?.includes('ENOTFOUND') || 
+                   error.message?.includes('ETIMEOUT') || 
+                   error.message?.includes('queryTxt');;
       console.error("Error creating resources:", error);
       return NextResponse.json({ 
         error: isDbError ? "Network unavailable" : "Internal server error" 
@@ -172,7 +175,10 @@ export async function GET(req: Request) {
     return NextResponse.json({books, total} , { status: 200 });
   } 
   catch (error: any) {
-    const isDbError = error.message?.includes('MongoNetworkError') || error.message?.includes('ENOTFOUND');
+    const isDbError = error.message?.includes('MongoNetworkError') ||
+                   error.message?.includes('ENOTFOUND') || 
+                   error.message?.includes('ETIMEOUT') || 
+                   error.message?.includes('queryTxt');;
     console.error("Error fetching admin resources:", error);
     return NextResponse.json({ 
       error: isDbError ? "Network unavailable" : "Internal server error" 
@@ -204,7 +210,10 @@ export async function GET(req: Request) {
     
 
     }  catch (error: any) {
-      const isDbError = error.message?.includes('MongoNetworkError') || error.message?.includes('ENOTFOUND');
+      const isDbError = error.message?.includes('MongoNetworkError') ||
+                   error.message?.includes('ENOTFOUND') || 
+                   error.message?.includes('ETIMEOUT') || 
+                   error.message?.includes('queryTxt');;
       console.error("Error deleting resources:", error);
       return NextResponse.json({ 
         error: isDbError ? "Network unavailable" : "Internal server error" 
@@ -300,7 +309,10 @@ export async function GET(req: Request) {
   { status: 200 }
   );
   }  catch (error: any) {
-  const isDbError = error.message?.includes('MongoNetworkError') || error.message?.includes('ENOTFOUND');
+  const isDbError = error.message?.includes('MongoNetworkError') ||
+                   error.message?.includes('ENOTFOUND') || 
+                   error.message?.includes('ETIMEOUT') || 
+                   error.message?.includes('queryTxt');;
   console.error('Error updating resources:', error);
   return NextResponse.json({
   error: isDbError ? 'Network unavailable' : 'Internal server error'

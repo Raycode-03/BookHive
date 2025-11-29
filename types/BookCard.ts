@@ -13,4 +13,5 @@ export interface Book {
   createdAt?: string;
   isOverdue?: boolean;
   overdueDays?: number;
+  isBorrowedByUser?:boolean;
 }
