@@ -2,7 +2,7 @@ import { get_db, connect_db } from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import cloudinary from "@/lib/cloudinary";
-
+import { getUnifiedSession } from "@/lib/getUnifiedSession";
 async function uploadFileToCloudinaryWithRetry(file: File, folder: string,  maxRetries = 3) {
   let lastError;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -67,6 +67,11 @@ async function uploadFileToCloudinaryWithRetry(file: File, folder: string,  maxR
 
   export async function POST(req: Request) {
     try {
+      const session = await getUnifiedSession();
+   if (!session?.user || !session?.user.isAdmin) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  
       await connect_db();
       const db = get_db();
       
@@ -139,6 +144,10 @@ async function uploadFileToCloudinaryWithRetry(file: File, folder: string,  maxR
     }
   }
 export async function GET(req: Request) {
+    const session = await getUnifiedSession();
+   if (!session?.user || !session?.user.isAdmin) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     await connect_db();
     const db = get_db();
@@ -186,6 +195,10 @@ export async function GET(req: Request) {
   }
 }
   export async function DELETE(req:Request){
+      const session = await getUnifiedSession();
+   if (!session?.user || !session?.user.isAdmin) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
     try {
       const { id } = await req.json();
       await connect_db();
@@ -221,6 +234,10 @@ export async function GET(req: Request) {
     }
   }
   export async function PUT(req:Request){
+      const session = await getUnifiedSession();
+   if (!session?.user || !session?.user.isAdmin) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
   await connect_db();
   const db = get_db();

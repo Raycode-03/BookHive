@@ -10,7 +10,6 @@ import { getUnifiedSession } from "@/lib/getUnifiedSession";
       const user = session?.user;
       const userId = user?.id
       const {bookId, returnDate} = await req.json();
-      console.log("Received borrow request:", { bookId,userId , returnDate });
       // Validate required fields
       if (!bookId || !userId) {
         return NextResponse.json({ error: "Book ID and User ID are required" }, { status: 400 });
@@ -72,9 +71,9 @@ import { getUnifiedSession } from "@/lib/getUnifiedSession";
       await db.collection('borrows').insertOne({ bookId: new ObjectId(bookId),   userId: new ObjectId(userId),
       borrowDate: new Date(),
       returnDate: returnDate ? new Date(returnDate) : null,
+      actualReturnDate: null,
       status: 'active',
-      createdAt: new Date(),
-      updatedAt: new Date()});
+      createdAt: new Date(),});
       return NextResponse.json({ 
         message: "Book borrowed successfully"
       });

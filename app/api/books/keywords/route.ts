@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { connect_db, get_db } from "@/lib/mongodb";
+import { getUnifiedSession } from "@/lib/getUnifiedSession";
 interface Book {
   _id: string;
   title: string;
@@ -9,6 +10,10 @@ interface Book {
 }
 
 export async function GET(req: Request) {
+  const session = await getUnifiedSession();
+   if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("query")?.trim() || "";

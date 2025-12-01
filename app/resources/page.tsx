@@ -244,6 +244,7 @@ const UserResources: React.FC = () => {
               availableCopies={book.availableCopies}
               ctaLabel={(book.availableCopies ?? 0) > 0 ? "Borrow" : "Unavailable"}
               isBorrowedByUser={book.isBorrowedByUser}
+              isReservedByUser={book.isReservedByUser}
             />
           ))}
         </div>

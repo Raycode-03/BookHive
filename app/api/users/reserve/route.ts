@@ -10,7 +10,6 @@ import { getUnifiedSession } from "@/lib/getUnifiedSession";
       const user = session?.user;
       const userId = user?.id
       const {bookId , returnDate} = await req.json();
-      console.log(userId , bookId , returnDate)
       // Validate required fields
        if (!bookId || !userId) {
         return NextResponse.json({ error: "Book ID and User ID are required" }, { status: 400 });
@@ -36,7 +35,10 @@ import { getUnifiedSession } from "@/lib/getUnifiedSession";
         );
       }
     }
-
+      const reserveStart = returnDate ? new Date(returnDate) : new Date(); // if user picked date, use it; otherwise today
+      reserveStart.setHours(0, 0, 0, 0);
+      const autoReturnDate = new Date(reserveStart);
+      autoReturnDate.setDate(autoReturnDate.getDate() + 14); 
        // DEBUG: Check what document we're trying to update
     const resource = await db.collection('resources').findOne({ 
       _id: new ObjectId(bookId) 
@@ -68,10 +70,11 @@ import { getUnifiedSession } from "@/lib/getUnifiedSession";
       }
       await db.collection('reserves').insertOne({ bookId: new ObjectId(bookId),   userId: new ObjectId(userId),
       borrowDate: new Date(),
-      returnDate: returnDate ? new Date(returnDate) : null,
+      reserveStartDate: reserveStart,
+      returnDate: autoReturnDate,
+      actualReturnDate: null,
       status: 'active',
       createdAt: new Date(),
-      updatedAt: new Date()
       });
       return NextResponse.json({ 
         message: "Book reserved successfully"

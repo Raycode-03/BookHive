@@ -162,10 +162,13 @@ function BookActionForm({ book, actionType, onSuccess, onClose }: BookActionForm
               className="w-full"
             />
           </div>
+          <div>
 
+            
+          </div>
           <div>
             <Label htmlFor="returnDate" className="text-sm font-medium mb-2 block">
-              Return Date *
+              {actionType === 'reserve' ? 'Reservation Start Date *' : 'Return Date *'}
             </Label>
             <Input
               type="date"
@@ -177,7 +180,9 @@ function BookActionForm({ book, actionType, onSuccess, onClose }: BookActionForm
               className="w-full"
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-              Select a date between today and {getMaxDate()} (max 14 days)
+                {actionType === 'reserve' 
+                ? `Select a date until which you want to reserve this book (max 14 days)` 
+                : `Select a date between today and ${getMaxDate()} (max 14 days)`}
             </p>
             
             {/* ✅ Show validation message */}

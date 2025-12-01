@@ -1,6 +1,11 @@
 import { get_db , connect_db } from "@/lib/mongodb";
 import { NextResponse } from "next/server";
+import { getUnifiedSession } from "@/lib/getUnifiedSession";
 export async function GET() {
+    const session = await getUnifiedSession();
+     if (!session?.user || !session?.user.isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
   try {
     await connect_db();
     const db = get_db();
