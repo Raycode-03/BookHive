@@ -17,8 +17,8 @@ export async function POST() {
     for (const reserve of dueReserves) {
       // Move to borrows
       await borrowCol.insertOne({
-        userId: reserve.userId,
         bookId: reserve.bookId,
+        userId: reserve.userId,
         borrowDate: reserve.borrowDate || now,
         returnDate: reserve.returnDate,
         status: "active",
