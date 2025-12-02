@@ -58,16 +58,7 @@ import { getUnifiedSession } from "@/lib/getUnifiedSession";
 
     if (existingBorrow) {
       return NextResponse.json({ error: "You already have an active reserve for this book" }, { status: 400 });
-    } 
-
-      const updateResult = await db.collection('resources').updateOne({_id: new ObjectId(bookId) , availableCopies: {$gt:0}},
-        {  $inc: { availableCopies: -1 } });
-        // Check if a document was actually updated
-      if (updateResult.modifiedCount === 0) {
-        return NextResponse.json({ 
-          error: "No available copies to reserve" 
-        }, { status: 400 });
-      }
+    }
       await db.collection('reserves').insertOne({ bookId: new ObjectId(bookId),   userId: new ObjectId(userId),
       borrowDate: new Date(),
       reserveStartDate: reserveStart,

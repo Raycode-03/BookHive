@@ -19,7 +19,6 @@ interface BookActionFormProps {
 
 // API functions
 const borrowBook = async (bookData: {bookId: string; returnDate: string }) => {
-  console.log("Rboorowign book with data:", bookData);
   const response = await fetch('/api/users/borrow', {
     method: 'POST',
     body: JSON.stringify(bookData),
@@ -30,7 +29,6 @@ const borrowBook = async (bookData: {bookId: string; returnDate: string }) => {
 }
 
 const reserveBook = async (bookData: { bookId: string; returnDate: string }) => {
-  console.log("Reserving book with data:", bookData);
   const response = await fetch('/api/users/reserve', {
     method: 'POST',
     body: JSON.stringify(bookData),

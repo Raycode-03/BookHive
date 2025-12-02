@@ -165,9 +165,9 @@ export const BookCardWithAction: React.FC<BookCardWithActionProps> = ({
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" 
         />
         {packageType === 'premium' && (
-          <div className="absolute top-2 right-2 bg-yellow-100 dark:bg-yellow-700 rounded-full p-1 shadow-sm">
-            <Crown className="h-4 w-4 text-yellow-500 dark:text-yellow-300" />
-          </div>
+                  <div className="absolute top-2 right-2 bg-yellow-100 rounded-full p-1 shadow-sm">
+                    <Crown className="h-4 w-4 text-yellow-500" />
+                  </div>
         )}
       </div>
 

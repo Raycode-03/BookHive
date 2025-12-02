@@ -1,21 +1,13 @@
 "use client"
 import React, { useState, useEffect } from 'react'
-import { Search, Mail, UserCheck, UserX, User } from 'lucide-react'
+import { Search, Mail, UserCheck, UserX, User, ArrowLeftRight } from 'lucide-react'
 import { UsersSkeleton } from '../users/skeleton'
 import { toast } from 'sonner'
-interface User {
-  _id: string
-  name: string
-  email: string
-  image?: string
-  isAdmin: boolean
-  packageType: string
-  createdAt: string
-  isSuspended?: boolean
-}
+import Image from 'next/image'
+import { UserType } from '@/types/Admin'
 
 const UserManagement = () => {
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<UserType[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState<'all' | 'free' | 'premium' | 'admin'>('all')
@@ -104,6 +96,23 @@ const UserManagement = () => {
       console.error('Failed to unsuspend user:', error)
     }
   }
+  const changePackageType = async ( userId: string ) => {
+    try {
+      const res = await fetch(`/api/admin/users/change_package`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
+      const data = await res.json();
+      if(!res.ok){
+        toast.error(data?.error || "error changing user package ")
+      }else {
+        fetchUsers()
+      }}catch(err){
+        console.log('Failed to convert Package Type' , err)
+      }
+  }
+      
 
   const formatAdminDate = (dateString: string) => {
     const datePart = dateString.split(' at ')[0];
@@ -183,8 +192,10 @@ const UserManagement = () => {
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
                         {user.image ? (
-                          <img
+                          <Image
                             className="h-10 w-10 rounded-full"
+                            width={150}
+                            height={150}
                             src={user.image}
                             alt={user.name}
                           />
@@ -268,6 +279,15 @@ const UserManagement = () => {
                           title="Suspend User"
                         >
                           <UserX className="w-4 h-4" />
+                        </button>
+                      )}
+                      {user.packageType === 'free' && (
+                           <button
+                          onClick={() => changePackageType( user._id )}
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                          title="Change Premium"
+                        >
+                          <ArrowLeftRight className="w-4 h-4" />
                         </button>
                       )}
                       

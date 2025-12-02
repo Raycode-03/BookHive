@@ -32,7 +32,7 @@ const userItems = [
 const adminItems = [
   { title: "Home", url: "/admin/dashboard", icon: Home },
   { title: "Library Management", url: "/admin/library", icon: LibraryBig },
-  { title: "Settings", url: "/admin/settings", icon: Settings },
+  { title: "Settings", url: "/settings", icon: Settings },
 ]
 
 
@@ -78,15 +78,14 @@ export function AppSidebar({ userRole }) {
                     <a
                       href={item.url}
                       className={`flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors ${
-                        isCollapsed ? 'justify-center' : ''
+                        isCollapsed ? 'justify-start' : ''
                       }`}
                     >
                       <item.icon size={20} className="text-gray-700 dark:text-white" />
-                      {!isCollapsed && (
-                        <span className="font-medium text-gray-700 dark:text-white">
+                      <span className="font-medium text-gray-700 dark:text-white">
                           {item.title}
                         </span>
-                      )}
+
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

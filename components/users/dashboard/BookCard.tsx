@@ -1,7 +1,7 @@
 import React from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { Crown } from 'lucide-react'
+import { Crown , Loader2} from 'lucide-react'
 import { Book } from '@/types/BookCard'
 interface BookCardProps  extends Book{
   daysAvailable?: number
@@ -10,6 +10,7 @@ interface BookCardProps  extends Book{
   isOverdue?: boolean
   borrowFee?: number
   ctaLabel: string
+  isLoading?: boolean
   onClick?: () => void
 }
 
@@ -24,6 +25,7 @@ export const BookCard: React.FC<BookCardProps> = ({
   packageType,
   daysAvailable,
   daysRemaining,
+  isLoading = false,
 }) => {
   return (
     <div
@@ -34,16 +36,17 @@ export const BookCard: React.FC<BookCardProps> = ({
       {/* Book Image */}
       <div className="relative h-40">
         <Image src={imageUrl} alt={title} fill className="object-cover" sizes="100%" />
-      </div>
-
-      {/* Book Details */}
-      <div className="p-4 flex flex-col flex-1 relative gap-2">
-        {/* Optional Premium Badge */}
         {packageType === 'premium' && (
           <div className="absolute top-2 right-2 bg-yellow-100 rounded-full p-1 shadow-sm">
             <Crown className="h-4 w-4 text-yellow-500" />
           </div>
         )}
+      </div>
+
+      {/* Book Details */}
+      <div className="p-4 flex flex-col flex-1 relative gap-2">
+        {/* Optional Premium Badge */}
+        
 
         <h3 className="font-semibold text-lg">{title}</h3>
         <p className="text-sm text-gray-600">by {author}</p>
@@ -60,8 +63,16 @@ export const BookCard: React.FC<BookCardProps> = ({
         )}
 
         {/* CTA */}
-        <Button className="w-full mt-auto" onClick={onClick}>
-          {ctaLabel}
+        <Button className="w-full mt-auto dark:text-gray-100 cursor-pointer" onClick={onClick} disabled={isLoading}
+          variant={isOverdue ? "destructive" : "default"}>
+             {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            ctaLabel
+          )}
         </Button>
       </div>
     </div>

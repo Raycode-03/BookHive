@@ -133,6 +133,29 @@ export function UsersBoxSkeleton({ count = 4 }: { count?: number }) {
     </div>
   );
 }
+
+export function CardSkeleton({ count = 3 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {Array.from({ length: count }).map((_, index) => (
+        <div
+          key={index}
+          className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-200 dark:border-gray-700 text-center"
+        >
+          {/* Icon circle */}
+          <Skeleton className="w-10 h-10 rounded-full mx-auto mb-4 dark:bg-gray-700" />
+
+          {/* Title skeleton */}
+          <Skeleton className="h-4 w-32 mx-auto mb-2 dark:bg-gray-700" />
+
+          {/* Description skeleton */}
+          <Skeleton className="h-3 w-24 mx-auto dark:bg-gray-700" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function BooksSkeleton({ count = 8 }: { count?: number }) {
   return (
     <div className="p-6">

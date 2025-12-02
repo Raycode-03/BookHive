@@ -60,7 +60,7 @@ const AdminDashboard = () => {
       icon: <Clock className="w-8 h-8 text-red-600 dark:text-red-400 mx-auto" />,
       key: 'overdue' as const,
       count: `${stats.overdue.total} Overdue`,
-      alert: `$${stats.overdue.totalFines} in Fines`
+      alert: `₦${stats.overdue.totalFines} in Fines`
     },
     {
       title: 'Book Reservations',
