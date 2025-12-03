@@ -20,19 +20,19 @@ async function Page() {
       title: "Quick Search & Filters",
       description:
         "Find what you need instantly using smart search, categories, and filters. No more manual digging through lists.",
-      img: "/logos/Lshelf.jpg",
+      img: "/logos/lshelf.jpg",
     },
     {
       title: "Borrowing & Reservations",
       description:
         "Let users reserve or borrow items and track due dates with ease. Smooth resource management made simple.",
-      img: "/logos/Lshelf.jpg",
+      img: "/logos/lshelf.jpg",
     },
     {
       title: "Overdue Fine Tracking",
       description:
         "Automatic fine calculation for late returns to keep things fair and organized.",
-      img: "/logos/Lshelf.jpg",
+      img: "/logos/lshelf.jpg",
     },
   ];
 
