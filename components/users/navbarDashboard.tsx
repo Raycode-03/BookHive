@@ -45,32 +45,34 @@ export default function NavbarDashboard({ user, pageTitle = "dashboard", searchB
     
     const searchRef = useRef<HTMLDivElement>(null)
     const userMenuRef = useRef<HTMLDivElement>(null)
+    const mobileSearchOverlayRef = useRef<HTMLDivElement>(null)
     const searchInputRef = useRef<HTMLInputElement>(null)
     const mobileSearchInputRef = useRef<HTMLInputElement>(null)
     // Close handlers
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
+             const target = e.target as Node;
             // Close search results when clicking outside
-            if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+            if (!isMobileDevice && searchRef.current && !searchRef.current.contains(target)) {
                 setShowSearchResults(false);
             }
             
-            // Close mobile search when clicking outside the entire search area
-            if (showSearchMobile && searchRef.current && !searchRef.current.contains(e.target as Node)) {
+           // For mobile - close when clicking outside the entire overlay
+            if (showSearchMobile && mobileSearchOverlayRef.current && !mobileSearchOverlayRef.current.contains(target)) {
                 setShowSearchMobile(false);
                 setShowSearchResults(false);
                 setQuery("");
             }
             
-            // Close user menu when clicking outside
-            if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+             // Close user menu when clicking outside
+            if (showUserMenu && userMenuRef.current && !userMenuRef.current.contains(target)) {
                 setShowUserMenu(false);
             }
         }
 
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [showSearchMobile]);
+    }, [showSearchMobile, showUserMenu, isMobileDevice]);
 
     // Focus mobile search input when opened
     useEffect(() => {
@@ -149,8 +151,6 @@ export default function NavbarDashboard({ user, pageTitle = "dashboard", searchB
                         <li
                             key={i}
                             onClick={() => {
-                                // setQuery(word.snippet);
-                                // setShowSearchResults(false);
                                 const route = user?.isAdmin 
                                 ? `/admin/library?search=${encodeURIComponent(word.snippet)}`
                                 : `/resources?search=${encodeURIComponent(word.snippet)}`;
@@ -315,11 +315,9 @@ export default function NavbarDashboard({ user, pageTitle = "dashboard", searchB
 
             {/* Mobile Search Overlay */}
             {searchBooks && isMobileDevice && showSearchMobile && (
-                <div className="fixed inset-0 z-40 bg-white dark:bg-gray-900">
+                <div className="fixed inset-0 z-40 bg-white dark:bg-gray-900" ref={mobileSearchOverlayRef}>
                     <div 
-                        className="flex items-center h-16 px-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
-                        ref={searchRef}
-                    >
+                        className="flex items-center h-16 px-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                         <div className="flex-1 mr-3">
                             <SearchBar
                               query={query}
