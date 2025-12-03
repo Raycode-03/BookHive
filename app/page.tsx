@@ -14,7 +14,7 @@ async function Page() {
       title: "Smart Cataloging",
       description:
         "Easily reserve your books, games, movies, music, and more. One can also reserve for the future — all in one cloud-based system.",
-      img: "/logos/Lshelf.jpg",
+      img: "/logos/lshelf.jpg",
     },
     {
       title: "Quick Search & Filters",
