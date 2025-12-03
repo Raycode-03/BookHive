@@ -1,7 +1,7 @@
 import { connect_db, get_db } from '@/lib/mongodb';
 import { NextResponse } from 'next/server';
-import { processReserves } from '../tasks/process-reserve/route';
-import { checkOverdueFines } from '../tasks/check-overdue/route';
+import { processReserves } from '@/components/cron/tasks/process-reserve';
+import { checkOverdueFines } from '@/components/cron/tasks/check-overdue';
 
 export async function POST() {
   try {
@@ -31,7 +31,7 @@ export async function POST() {
       },
       summary: {
         reservationsProcessed: reservesResult.processed,
-        loansCheckedForFines: finesResult.overdueCount,
+        loansCheckedForFines: finesResult.message,
         totalTasksCompleted: 2
       }
     }, { status: 200 });

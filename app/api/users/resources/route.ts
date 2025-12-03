@@ -2,7 +2,17 @@ import { connect_db, get_db } from "@/lib/mongodb"
 import { NextResponse } from "next/server";
 import { getUnifiedSession } from "@/lib/getUnifiedSession";
 import { ObjectId } from "mongodb";
-
+import { Book } from "@/types/BookCard";
+interface Borrow {
+  _id: ObjectId;
+  bookId: ObjectId;
+  [key: string]: any; // For any additional fields
+}
+interface Reserve {
+  _id: ObjectId;
+  bookId: ObjectId;
+  [key: string]: any; 
+}
 export async function GET(req: Request) {
   const session =await  getUnifiedSession()
   if(!session){
@@ -55,14 +65,14 @@ export async function GET(req: Request) {
       const isReservedByUser = await db.collection('reserves').find({userId: new ObjectId(user.id) ,  actualReturnDate: null}).project({bookId:1}).toArray();
         // ✅ Create a Set of borrowed book IDs for fast lookup
     const borrowedBookIds = new Set(
-      isBorrowedByUser.map(borrow => borrow.bookId.toString())
+      isBorrowedByUser.map((borrow:Borrow) => borrow.bookId.toString())
     );
     const reservedBookIds = new Set(
-      isReservedByUser.map(reserve => reserve.bookId.toString())
+      isReservedByUser.map((reserve:Reserve) => reserve.bookId.toString())
     );
     
     // ✅ Add isBorrowedByUser field to each book
-    const booksWithBorrowStatus = books.map(book => ({
+    const booksWithBorrowStatus = books.map((book:Book) => ({
       ...book,
       isBorrowedByUser: borrowedBookIds.has(book._id.toString()),
       isReservedByUser: reservedBookIds.has(book._id.toString()),

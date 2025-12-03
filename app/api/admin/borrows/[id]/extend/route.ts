@@ -5,10 +5,11 @@ import { ObjectId } from "mongodb";
 
 export async function POST(
   request: Request,
-  context: { params: Promise<{ id: string }> } // Note: params is a Promise
+  context: { params: Promise<{ id: string }> }
 ) {
-    const { id } = await context.params; 
+  const { id } = await context.params; 
   const session = await getUnifiedSession();
+  
   if (!session?.user || !session?.user.isAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -16,9 +17,11 @@ export async function POST(
   try {
     const body = await request.json();
     const { daystoadd } = body;
-     if (typeof daystoadd !== 'number') {
+    
+    if (typeof daystoadd !== 'number') {
       return NextResponse.json({ error: "Number of days is required" }, { status: 400 });
     }
+    
     await connect_db();
     const db = get_db();
     const borrowsCollection = db.collection("borrows");
@@ -37,10 +40,11 @@ export async function POST(
     if (!borrow) {
       return NextResponse.json({ error: "Active borrow record not found" }, { status: 404 });
     }
+    
     const currentStartDate = new Date(borrow.returnDate);
     const newStartDate = new Date(currentStartDate);
-    console.log("Current Start Date:", currentStartDate, "first date" , newStartDate);
     newStartDate.setDate(newStartDate.getDate() + daystoadd);
+    
     // Update return date
     const result = await borrowsCollection.updateOne(
       { _id: new ObjectId(id) },

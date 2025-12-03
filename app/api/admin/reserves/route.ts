@@ -2,7 +2,7 @@ import { get_db , connect_db } from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import { getUnifiedSession } from "@/lib/getUnifiedSession";
 import { ObjectId } from "mongodb";
-
+import {ReservationType} from "@/types/Admin"
 export async function GET() {
     const session = await getUnifiedSession();
      if (!session?.user || !session?.user.isAdmin) {
@@ -20,7 +20,7 @@ export async function GET() {
     
     // Populate book and user details
     const populatedReserves = await Promise.all(
-      reserves.map(async (reserve) => {
+      reserves.map(async (reserve:ReservationType) => {
         let book = null;
         let user = null;
         

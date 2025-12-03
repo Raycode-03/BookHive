@@ -4,7 +4,7 @@ import { Toaster } from "sonner";
 export const metadata = {
   title: "BookHive",
   description:
-    "Our library management service ...",
+    "BookHive is a scalable, user-friendly library management solution that automates reservations, borrowing workflows, inventory tracking, and user supervision in a centralized platform.",
 };
 
 

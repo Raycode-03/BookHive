@@ -2,6 +2,7 @@ import { get_db , connect_db } from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import { getUnifiedSession } from "@/lib/getUnifiedSession";
 import { ObjectId } from "mongodb";
+import { BorrowType } from "@/types/Admin";
 
 export async function GET() {
     const session = await getUnifiedSession();
@@ -20,7 +21,7 @@ export async function GET() {
     
     // Populate book and user details
     const populatedBorrows = await Promise.all(
-      borrows.map(async (borrow) => {
+      borrows.map(async (borrow:BorrowType) => {
         let book = null;
         let user = null;
         

@@ -12,7 +12,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const session = await getUnifiedSession();
 

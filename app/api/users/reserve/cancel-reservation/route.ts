@@ -22,7 +22,6 @@ export async function POST(req: Request) {
 
     const userId = new ObjectId(user.id);
     const reservationObjectId = new ObjectId(reservationId);
-    const bookObjectId = new ObjectId(bookId);
 
     // Check if reservation belongs to user
     const reservation = await db.collection("reserves").findOne({

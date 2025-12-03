@@ -2,7 +2,11 @@ import { get_db , connect_db } from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import { getUnifiedSession } from "@/lib/getUnifiedSession";
 import { ObjectId } from "mongodb";
-
+interface Fine {
+  _id: ObjectId;
+  borrowId: string;
+  [key: string]: any; // For any additional fields
+}
 export async function GET() {
     const session = await getUnifiedSession();
      if (!session?.user || !session?.user.isAdmin) {
@@ -21,7 +25,7 @@ export async function GET() {
     
     // Populate book and user details
     const populatedFines = await Promise.all(
-      fines.map(async (fine) => {
+      fines.map(async (fine:Fine) => {
         let book = null;
         let user = null;
         let borrow = null;

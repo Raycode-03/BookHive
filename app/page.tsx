@@ -5,9 +5,10 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import Footer from '@/components/users/footer'
 import { getUnifiedSession } from '@/lib/getUnifiedSession'
-const session = await getUnifiedSession();
-const user = session?.user;
-function Page() {
+
+async function Page() {
+  const session = await getUnifiedSession();
+  const user = session?.user;
   const features = [
     {
       title: "Smart Cataloging",

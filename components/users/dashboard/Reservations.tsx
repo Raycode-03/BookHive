@@ -87,11 +87,17 @@ const Reservations: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {reservations.map(reservation => {
                 if (!reservation.book) return null;
-                const returnDate = new Date(reservation.returnDate);
+                 const returnDate = reservation.returnDate 
+                    ? new Date(reservation.returnDate)
+                    : null;
                 const today = new Date();
-                const daysRemaining = Math.ceil(
-                    (returnDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-                );
+                 let daysRemaining = 0;
+                if(returnDate){
+                    daysRemaining = Math.ceil(
+                        (returnDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+                    );
+                }
+                
                 
                 return (
                     <BookCard

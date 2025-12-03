@@ -5,8 +5,9 @@ import { ObjectId } from "mongodb";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // Note: params is a Promise
 ) {
+    const { id } = await context.params; 
   const session = await getUnifiedSession();
   if (!session?.user || !session?.user.isAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -18,13 +19,13 @@ export async function POST(
     const finesCollection = db.collection("fines");
 
     // Validate ID
-    if (!ObjectId.isValid(params.id)) {
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid fine ID" }, { status: 400 });
     }
 
     // Check if fine exists
     const fine = await finesCollection.findOne({
-      _id: new ObjectId(params.id),
+      _id: new ObjectId(id),
       status: "unpaid"
     });
 
@@ -34,7 +35,7 @@ export async function POST(
 
     // Mark fine as paid
     const result = await finesCollection.updateOne(
-      { _id: new ObjectId(params.id) },
+      { _id: new ObjectId(id) },
       { 
         $set: { 
           status: "paid",
