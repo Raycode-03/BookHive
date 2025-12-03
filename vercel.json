@@ -3,8 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/daily-tasks",
-      "schedule": "0 23 * * *",
-      "name": "daily-library-tasks"
+      "schedule": "0 23 * * *"
     }
   ]
 }
