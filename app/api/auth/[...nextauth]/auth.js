@@ -33,16 +33,63 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         const client = await clientPromise;
         const db = client.db();
 
-        // Attempt to insert the user if not exists
+        // First, check if there's an existing account with this email but different provider
+        if (account) {
+          const existingUser = await db.collection("users").findOne({ 
+            email: user.email 
+          });
+
+          if (existingUser) {
+            // Check if this provider is already linked to this user
+            const existingAccount = await db.collection("accounts").findOne({
+              userId: existingUser._id,
+              provider: account.provider
+            });
+
+            if (!existingAccount) {
+              // Email exists but with different provider - link the new provider
+              await db.collection("accounts").insertOne({
+                userId: existingUser._id,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+                access_token: account.access_token,
+                token_type: account.token_type,
+                scope: account.scope,
+                expires_at: account.expires_at,
+              });
+
+              // Update user name/image if they're logging in for the first time with this provider
+              await db.collection("users").updateOne(
+                { _id: existingUser._id },
+                { 
+                  $set: { 
+                    name: user.name || existingUser.name,
+                    image: user.image || existingUser.image,
+                    updatedAt: new Date()
+                  } 
+                }
+              );
+
+              return true;
+            }
+          }
+        }
+
+        // If no existing user or account exists, create/update the user
         const result = await db.collection("users").findOneAndUpdate(
           { email: user.email },
           {
             $setOnInsert: {
               name: user.name,
               email: user.email,
+              image: user.image,
               isAdmin: false,
               packageType: "free",
               createdAt: new Date(),
+            },
+            $set: {
+              updatedAt: new Date(),
             },
           },
           { upsert: true, returnDocument: "after" }
@@ -56,6 +103,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }
       } catch (err) {
         console.error("Sign-in error:", err);
+        return false;
       }
 
       return true;
@@ -74,7 +122,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       }
 
       // Refresh user data from DB on each request
-      if (token.sub) {
+      if (token.email) {
         try {
           const client = await clientPromise;
           const db = client.db();
@@ -113,17 +161,40 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       return session;
     },
 
-    async redirect({ url }) {
-      const redirectBaseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-      if (url.startsWith("/")) return `${redirectBaseUrl}${url}`;
-      else if (new URL(url).origin === redirectBaseUrl) return url;
-      return redirectBaseUrl;
+    async redirect({ url, baseUrl }) {
+      // Use only NEXTAUTH_URL in production, no fallback
+      const redirectBaseUrl = process.env.NEXTAUTH_URL;
+      
+      if (!redirectBaseUrl) {
+        console.error("NEXTAUTH_URL environment variable is not set");
+        // Return to root path without hostname
+        return "/";
+      }
+      
+      // If no URL is provided or it's a relative path, redirect to home
+      if (!url || url.startsWith("/")) {
+        return `${redirectBaseUrl}/`;
+      }
+      
+      // If URL is from the same origin, allow it
+      try {
+        const urlObj = new URL(url);
+        if (urlObj.origin === redirectBaseUrl) {
+          return url;
+        }
+      } catch {
+        // Invalid URL, redirect to home
+      }
+      
+      return `${redirectBaseUrl}/`;
     },
   },
 
   pages: {
     signIn: '/login',
+    error: '/error',
   },
 
   secret: process.env.NEXTAUTH_SECRET,
+  trustHost: true,
 });
