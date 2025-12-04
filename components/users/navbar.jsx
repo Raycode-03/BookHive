@@ -139,7 +139,7 @@ export default function Navbar({ user }) {
           {/* Notifications */}
           <li>
             <Link
-              href="/notifications"
+              href="/users/notifications"
               className="hover:text-gray-300 transition-colors duration-200 relative"
             >
               <BellDot size={22} />
@@ -351,7 +351,7 @@ export default function Navbar({ user }) {
                                 
                                 {/* Common mobile links for all users */}
                                 <Link
-                                    href="/notifications"
+                                    href="/users/notifications"
                                     className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
                                     onClick={() => setMenuOpen(false)}
                                 >

@@ -238,7 +238,7 @@ export default function NavbarDashboard({ user, pageTitle = "dashboard", searchB
                     {/* Right Section - Icons & User Menu */}
                     <div className="flex items-center gap-3">
                         {/* Notifications */}
-                        <Link href="/notification" className="relative cursor-pointer">
+                        <Link href="/users/notification" className="relative cursor-pointer">
                             <button className="p-2 rounded-lg hover:bg-blue-700 transition-colors group relative">
                                 <Bell className="w-5 h-5 text-white" />
                                 <div className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full"></div>
