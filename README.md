@@ -50,6 +50,24 @@ A full-stack library system that allows users to borrow and reserve books while 
 ## Status
 ✅ Feature-complete core system  
 🔧 Open for optimization
+## Environment Variables
+
+The following environment variables are required to run the application.
+For security reasons, actual values are not included.
+AUTH_SECRET
+AUTH_GITHUB_ID
+AUTH_GITHUB_SECRET
+AUTH_GOOGLE_ID
+AUTH_GOOGLE_SECRET
+MONGODB_URL
+EMAIL_ADMIN
+EMAIL_PASS
+NEXTAUTH_SECRET
+cloudinary_api_cloud_name
+cloudinary_api_key
+cloudinary_api_secret
+NEXTAUTH_URL
+JWT_SECRET
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
