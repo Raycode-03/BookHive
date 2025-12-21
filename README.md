@@ -1,4 +1,56 @@
 Made by Raycode-03 😎
+# Library Management System
+
+A full-stack library system that allows users to borrow and reserve books while enabling admins to manage library resources.
+
+## User Features
+- Authentication (JWT & Google OAuth)
+- Browse library resources
+- Borrow books instantly
+- Reserve books for a future date
+- Notifications for:
+  - Reservations
+  - Borrow status
+  - Fines
+- User dashboard:
+  - Borrowed books
+  - Reserved books
+  - Active fines
+- Profile management (image, name, email, password)
+
+## Admin Features
+- Resource management:
+  - Create, edit, delete books
+  - Upload book images (Cloudinary)
+- Dashboard statistics:
+  - Total users
+  - Borrowed books
+  - Overdue books
+- Pagination:
+  - Number-based pagination (admin)
+  - Infinite scroll (users)
+- Skeleton loaders
+
+## Automation
+- Cron jobs handle:
+  - Automatic conversion of reservations to borrows
+  - 14-day borrow period enforcement
+  - Fine calculation
+  - 2-day grace period tracking
+  - Notification triggers
+
+## Tech Stack
+- Frontend: Next.js, TypeScript, Tailwind CSS
+- Backend: Node.js, Express.js
+- Database: MongoDB
+- Authentication: JWT, Google OAuth
+- Media Storage: Cloudinary
+- Background Jobs: Cron
+
+## Status
+✅ Feature-complete core system  
+🔧 Open for optimization
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
