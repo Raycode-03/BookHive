@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { processReserves } from '@/components/cron/tasks/process-reserve';
 import { checkOverdueFines } from '@/components/cron/tasks/check-overdue';
 
-export async function POST() {
+export async function GET() {
   try {
     await connect_db();
     const db = get_db();
